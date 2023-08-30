@@ -9,7 +9,7 @@ The main data structure is scope, enclosed in either parentheses or brackets. Sc
 Whether to use brackets or parentheses depends on whether you want variables assignments inside the block to escape to the broader scope. F code safety, defer to brackets when creating intermediate variables, but otherwise prefer parentheses to avoid overheads.
 
 # Objects and self-reference
-NS has object-oriented features. `new` can be accessed from within scopes to refer to their variable scope. Fun (object-oriented) things happen when outputting the new reference. For example, `point = {x=1; y=1; new}` creates an object with fields x and y. We will tackle classes and constructors later. Get or set of this object on `point.x`. This actually enters the left-hand-side scope, which means that you can use it to edit objects like so:
+NS has object-oriented features. `new` refers to the current scope itself and `super` to the parent scope generating it. Fun (object-oriented) things happen when outputting the new reference. For example, `point = {x=1; y=1; new}` creates an object with fields x and y. We will tackle classes and constructors later. Get or set of this object on `point.x`. This actually enters the left-hand-side scope, which means that you can use it to edit objects like so:
 
 ```cpp
 point.(x = x+1; z = 2);
@@ -20,22 +20,38 @@ You can also use bracket scopes to create objects within the scope of other obje
 
 ```cpp
 point = {x=1;y=2;z=3;new};
-derived = point.{y=4;z=z;new}; // creates an object within the scope of point
+derived = point.{y=4;z=z;new}; // creates an object within the scope of A
 point.(x=0;y=0;z=0); // edits the point
 print(derived.x); // since x is not set in derived, it will be retrieved from its superscope and will be 0
 print(derived.y); // this is directly set in the scope of derived and will be 4
 print(derived.z); // this is also directly set for derived, and got the value point.z had at the time, that is, 3
+print(derived.super); // this is the parent scope of derived, which is the point object
 ```
 
 # Formulas
-The final operation at the core of NS is the assignment of callable formulas. These define any kind of predicate-based notation, including that of other programming languages. Basically, you need to write a textual expression to be matched, including spaces between predicates, and any arguments need to be enclosed parentheses. Arguments are added to the scope of running formulas. For example, you can define a constructor for class objects like so: 
+The final NS core operation is the assignment of callable formulas. These define any kind of predicate-based notation.
+Basically, you need to write a textual expression to be matched *including expressions with multiple predicates seperated by spaces*, and any arguments need to be enclosed parentheses. When formulas run, they do so under a scope of their argument
+values. For example, you can define a constructor for class objects like so: 
 
 ```cpp
-Point(x,y,z) := {
-    norm squared:=x*x + y*y + z*z; 
+Point(x,y,z) := { // x, y, z are automatically accessed
     new
 }
 ```
+
+If formula implementations are not scoped into brackets, internal assignments are transferred 
+to their superscope too per normal (the arguments themselves are never assigned, so they will
+not leak). For example `set f(value):=(f=value)` is equivalent to `set f(value):={super.super.f=value}`,
+where in the last expression the first superscope are the arguments and only this one's supercope
+is the object.
+
+
+```cpp
+Point(x,y,z) := { // x, y, z are automatically accessed
+    norm squared:=x*x + y*y + z*z; 
+    shrink(a) := (x=x*a;y=y*a;z=z*a;); // if you want to keep track of the last argument value within Point set a=a
+    new
+}
 
 In this snippet, norm squared is a method name that includes spaces. For example write:
 

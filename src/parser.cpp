@@ -33,7 +33,8 @@ class Callable: public CustomPredicateExecutor {
             return scope->enter();
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            scope->set("new", scope->get("super"));
+            if(std::dynamic_pointer_cast<Scoped>(call_) == nullptr)
+                scope->set("new", scope->get("super"));
             return call_->value(scope);
         }
         const std::string name() const {
@@ -56,10 +57,17 @@ std::vector<std::string> tokenize(const std::string& source) {
     char last_parenthesis = ',';
     char last_parenthesis_close = ' ';
     int sN = source.length();
+    bool comments = false;
     for(int i=0;i<sN;i++){
         char c = source[i];
-        if(c=='\n')
+        if(c=='/' && i<sN-1 && source[i+1]=='/')
+            comments = true;
+        if(c=='\n') {
             c = ' ';
+            comments = false;
+        }
+        if(comments)
+            continue;
         if(c=='\t')
             c = ' ';
         if(!isalpha(c) && !isdigit(c)) {
