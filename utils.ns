@@ -1,5 +1,6 @@
 range(a,b,step) := {
 	ni = a;
+	b = b;
 	next := (i=ni;ni=(ni)+(step);i)<(b);
 	new
 };
