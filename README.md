@@ -1,5 +1,17 @@
 # About
-NS is an object-oriented language with a minimal instruction set that simplifies programming and metaprogramming.
+NS is an object-oriented interpreted language with a minimal instruction set that simplifies programming and metaprogramming.
+
+# Setup
+*The project is still under development, and only a windows distribution is available.*
+
+## Windows
+
+Download the interpreter executable `ns.exe` 
+and put it alongside a source code file file.ns. Run the command line instruction:
+
+```
+ns file.ns
+```
 
 # Scopes
 The base operation of NS is typical variable assignment like `x = 2` and callable assignment like `sqr(x) := {x*x}`. The last one defines callable formulas (e.g., methods), and we will talk about it later.

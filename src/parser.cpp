@@ -17,6 +17,15 @@
 #include "CustomPredicateExecutor.h"
 
 
+bool is_number_convertible(std::string predicate) {
+    int digits = predicate.length();
+    for(int i=0;i<digits;i++)
+        if(!isdigit(predicate[i]) && predicate[i]!='.')
+            return false;
+    return digits;
+}
+
+
 class Callable: public CustomPredicateExecutor {
     private:
         std::shared_ptr<Object> call_;
@@ -108,7 +117,15 @@ std::vector<std::string> tokenize(const std::string& source) {
             break;
         }
         std::string next_token = tokens[i+1];
-        if(token.length()==1 && next_token.length()==1 && token!=" " && !isalpha(token[0]) && !isdigit(token[1]) && next_token=="=") {
+        if(is_number_convertible(token) && next_token==".") {
+            if(i<N-1 && is_number_convertible(tokens[i+2])) {
+                token += "."+tokens[i+2];
+                i++;
+            }
+            merged_tokens.push_back(token);
+            i += 2;
+        }
+        else if(token.length()==1 && next_token.length()==1 && token!=" " && !isalpha(token[0]) && !isdigit(token[1]) && next_token=="=") {
             merged_tokens.push_back(token+next_token);
             i += 2;
         }
@@ -213,12 +230,7 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
 
     // convert to variable if only one token remaining
     if(from==to) {
-        std::string predicate = tokens[from];
-        bool isnumber = predicate.length();
-        for(long unsigned int i=0;i<predicate.length();i++)
-            if(!isdigit(predicate[i]) && predicate[i]!='.' && predicate[i]!='-')
-                isnumber = false;
-        if(isnumber)
+        if(is_number_convertible(tokens[from]))
             return std::make_shared<Number>(std::stof(tokens[from]));
         //return std::make_shared<Variable>(tokens[from]);
     }

@@ -1,5 +1,5 @@
 utils = {run('utils.ns')};
-r = utils.range(0, 10);
+r = utils.range(0.1, 10);
 while(r.next) {
 	print(r.i);
 };
