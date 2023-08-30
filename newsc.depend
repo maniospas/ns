@@ -1,0 +1,181 @@
+# depslib dependency file v1.0
+1693320062 source:c:\users\manio\desktop\newsc\newsc\main.cpp
+	<iostream>
+	<string>
+	<memory>
+	<map>
+	<ctype.h>
+	"parser.h"
+	"Scope.h"
+	"CustomPredicateExecutor.h"
+	<string>
+	<fstream>
+	<streambuf>
+	"Number.h"
+
+1693236349 source:c:\users\manio\desktop\newsc\newsc\src\object.cpp
+	"Object.h"
+	"Variable.h"
+
+1693236317 c:\users\manio\desktop\newsc\newsc\include\object.h
+	<string>
+	<memory>
+
+1693301419 c:\users\manio\desktop\newsc\newsc\include\scope.h
+	<string>
+	<memory>
+	<map>
+	"Object.h"
+
+1693319942 source:c:\users\manio\desktop\newsc\newsc\src\scope.cpp
+	<iostream>
+	"Scope.h"
+	"CustomPredicateExecutor.h"
+
+1693268957 source:c:\users\manio\desktop\newsc\newsc\src\variable.cpp
+	"Variable.h"
+	"Scope.h"
+	"CustomPredicateExecutor.h"
+	<memory>
+	<iostream>
+
+1693215546 c:\users\manio\desktop\newsc\newsc\include\variable.h
+	<string>
+	<Object.h>
+
+1693265326 source:c:\users\manio\desktop\newsc\newsc\src\number.cpp
+	"Number.h"
+
+1693211582 c:\users\manio\desktop\newsc\newsc\include\number.h
+	<string>
+	<Object.h>
+
+1693214338 source:c:\users\manio\desktop\newsc\newsc\src\runnable.cpp
+	"Runnable.h"
+
+1693214613 c:\users\manio\desktop\newsc\newsc\include\runnable.h
+	"Object.h"
+
+1693215522 source:c:\users\manio\desktop\newsc\newsc\src\sequence.cpp
+	"Sequence.h"
+
+1693216994 c:\users\manio\desktop\newsc\newsc\include\sequence.h
+	<Object.h>
+
+1693320853 source:c:\users\manio\desktop\newsc\newsc\src\assign.cpp
+	"Assign.h"
+	"Scope.h"
+
+1693227027 c:\users\manio\desktop\newsc\newsc\include\assign.h
+	<string>
+	"Object.h"
+
+1693217713 c:\users\manio\desktop\newsc\newsc\include\scoped.h
+	"Object.h"
+
+1693218354 source:c:\users\manio\desktop\newsc\newsc\src\scoped.cpp
+	"Scoped.h"
+	"Scope.h"
+
+1693220096 source:c:\users\manio\desktop\newsc\newsc\src\unscoped.cpp
+	"Unscoped.h"
+	"Scope.h"
+
+1693220069 c:\users\manio\desktop\newsc\newsc\include\unscoped.h
+	"Object.h"
+
+1693322596 source:c:\users\manio\desktop\newsc\newsc\src\predicate.cpp
+	"Predicate.h"
+	"CustomPredicateExecutor.h"
+	"Scope.h"
+	<iostream>
+
+1693248236 c:\users\manio\desktop\newsc\newsc\include\predicate.h
+	<string>
+	<vector>
+	<memory>
+	"Object.h"
+	"PredicatePart.h"
+
+1693265991 source:c:\users\manio\desktop\newsc\newsc\src\access.cpp
+	"Access.h"
+	"Scope.h"
+	<iostream>
+
+1693231123 c:\users\manio\desktop\newsc\newsc\include\access.h
+	<string>
+	"Object.h"
+
+1693322603 source:c:\users\manio\desktop\newsc\newsc\src\custompredicateexecutor.cpp
+	"CustomPredicateExecutor.h"
+	"Scope.h"
+	"String.h"
+	<iostream>
+	"parser.h"
+
+1693302013 c:\users\manio\desktop\newsc\newsc\include\custompredicateexecutor.h
+	<string>
+	<vector>
+	<memory>
+	"Object.h"
+	"Predicate.h"
+	"PredicatePart.h"
+	"Scope.h"
+
+1693245423 c:\users\manio\desktop\newsc\newsc\src\parser.cpp
+	<vector>
+	<string>
+	<iostream>
+	<memory>
+	"Variable.h"
+	"Scope.h"
+	"Number.h"
+	"Sequence.h"
+	"Assign.h"
+	"Scoped.h"
+	"Unscoped.h"
+	"Access.h"
+	"Predicate.h"
+	"CustomPredicateExecutor.h"
+
+1693322710 source:c:\users\manio\desktop\newsc\newsc\src\parser.cpp
+	<vector>
+	<string>
+	<iostream>
+	<memory>
+	"parser.h"
+	"Variable.h"
+	"Scope.h"
+	"Number.h"
+	"Sequence.h"
+	"Assign.h"
+	"Scoped.h"
+	"Unscoped.h"
+	"Access.h"
+	"String.h"
+	"Predicate.h"
+	"PredicatePart.h"
+	"CustomPredicateExecutor.h"
+
+1693248485 c:\users\manio\desktop\newsc\newsc\include\parser.h
+	<vector>
+	<string>
+	<memory>
+	"Object.h"
+	"PredicatePart.h"
+
+1693247588 c:\users\manio\desktop\newsc\newsc\include\predicatepart.h
+	<string>
+	<memory>
+	"Object.h"
+
+1693299771 source:c:\users\manio\desktop\newsc\newsc\src\predicatepart.cpp
+	"PredicatePart.h"
+
+1693315093 source:c:\users\manio\desktop\newsc\newsc\src\string.cpp
+	"String.h"
+
+1693250089 c:\users\manio\desktop\newsc\newsc\include\string.h
+	<string>
+	<Object.h>
+

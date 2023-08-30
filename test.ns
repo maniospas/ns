@@ -1,0 +1,6 @@
+utils = {run('utils.ns')};
+r = utils.range(0, 10);
+while(r.next) {
+	print(r.i);
+};
+new
