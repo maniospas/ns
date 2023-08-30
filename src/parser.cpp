@@ -60,8 +60,7 @@ class Callable: public CustomPredicateExecutor {
 
 
 void error(const std::string& message) {
-    std::cout << message << std::endl;
-    exit(0);
+    throw std::runtime_error(message+Object::get_stack_trace());
 }
 
 std::vector<std::string> tokenize(const std::string& source) {

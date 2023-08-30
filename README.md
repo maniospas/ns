@@ -46,7 +46,7 @@ You can also use bracket scopes to create objects within the scope of other obje
 ```cpp
 point = {x=1;y=2;z=3;new};
 derived = point.{y=4;z=z;new}; // creates an object within the scope of A
-point.(x=0;y=0;z=0); // edits the point
+point.(x=0;y=0;z=0); // edits the point (needs parenthesis for edits to be kept)
 print(derived.x); // since x is not set in derived, it will be retrieved from its superscope and will be 0
 print(derived.y); // this is directly set in the scope of derived and will be 4
 print(derived.z); // this is also directly set for derived, and got the value point.z had at the time, that is, 3
@@ -97,4 +97,6 @@ Use objects to pass keyword arguments or arguments that you don’t want to rema
 
 
 # External scope calls
-Consider a variable
+
+
+

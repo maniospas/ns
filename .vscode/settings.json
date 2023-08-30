@@ -43,6 +43,7 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "list": "cpp"
     }
 }

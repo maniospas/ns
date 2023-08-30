@@ -12,5 +12,6 @@ const std::string Unscoped::name() const {
 }
 
 std::shared_ptr<Object> Unscoped::value(std::shared_ptr<Scope> scope) {
-    return object_->value(scope);
+    push();
+    return pop(exists(object_)->value(scope));
 }

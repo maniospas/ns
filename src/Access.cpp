@@ -13,13 +13,15 @@ const std::string Access::name() const {
 }
 
 std::shared_ptr<Object> Access::value(std::shared_ptr<Scope> scope) {
+    push();
     auto object = object_->value(scope);
     std::shared_ptr<Scope> entered = std::dynamic_pointer_cast<Scope>(object);
+    exists(entered);
     auto enchanced = std::make_shared<Scope>(entered, 
                                              entered,
                                              std::shared_ptr<Scope>(nullptr),
                                              std::shared_ptr<Scope>(nullptr),
                                              scope); // scope is the fallfront
     
-    return name_->value(enchanced);
+    return pop(name_->value(enchanced));
 }

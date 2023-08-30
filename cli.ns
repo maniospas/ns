@@ -13,7 +13,8 @@ cli = 1;
 exit := (cli = 0;'NS command line terminated.');
 output = ( // allow self-modification
 	while(cli) (
-		run(read('> '))
+		line = read('> ');
+		try(run(line))
 	)
 );
 print(output)

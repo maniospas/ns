@@ -12,8 +12,9 @@ const std::string Assign::name() const {
 }
 
 std::shared_ptr<Object> Assign::value(std::shared_ptr<Scope> scope) {
+    push();
     auto key = name_;//->value(scope);
-    auto value = object_->value(scope);
+    auto value = exists(object_->value(scope));
     scope->set(key->assignment_name(), value);
-    return value;
+    return pop(value);
 }

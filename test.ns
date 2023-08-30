@@ -2,11 +2,17 @@ Point(x,y) := {norm:=((x)+(y)); set x(value):=(x=value); set y(value):=(y=value)
 a = Point(1,2);
 {
 	y = 5;
-	a.set x (y)
+	a.set x (y);
+	a.set y (y);
+	y = 4;
+	print(a.y)
 };
 print(a.x);
+print(a.y);
 {
 	j = 3;
 	a.set x (j)
 };
-print(a.x)
+print(a.x);
+print(a.y);
+new

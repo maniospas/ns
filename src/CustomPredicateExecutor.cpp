@@ -50,7 +50,7 @@ std::shared_ptr<Scope> CustomPredicateExecutor::scoped(std::shared_ptr<Scope> sc
 
 std::shared_ptr<Scope> CustomPredicateExecutor::descoped(std::shared_ptr<Scope> derived_scope) {
     derived_scope->set("new", derived_scope->get("super"));
-    derived_scope->set("fallfront", std::shared_ptr<Scope>(nullptr));
+    //derived_scope->set("fallfront", std::shared_ptr<Scope>(nullptr));
     return derived_scope;
 }
 
@@ -61,7 +61,7 @@ std::shared_ptr<Scope> CustomPredicateExecutor::vscoped(std::shared_ptr<Scope> s
 std::shared_ptr<Scope> CustomPredicateExecutor::predicateScope = std::make_shared<PredicateScope>();
 
 std::shared_ptr<Object> CustomPredicateExecutor::evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope) {
-    return expression->value(scope);
+    return exists(expression->value(scope));
 }
 
 std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate) {

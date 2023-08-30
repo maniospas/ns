@@ -22,11 +22,12 @@ const std::string Predicate::name() const {
 }
 
 std::shared_ptr<Object> Predicate::value(std::shared_ptr<Scope> scope) {
-    auto obj = scope->get(assignment_name());
+    push();
+    auto obj = exists(scope->get(assignment_name()));
     std::shared_ptr<CustomPredicateExecutor> executor = std::dynamic_pointer_cast<CustomPredicateExecutor>(obj);
     if(executor==nullptr)
-        return obj;
-    return executor->call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()));
+        return pop(obj);
+    return pop(executor->call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this())));
 }
 
 const std::string Predicate::assignment_name() const {
