@@ -9,6 +9,14 @@
 #include "Scope.h"
 #include "CustomPredicateExecutor.h"
 #include "Number.h"
+#include "String.h"
+
+
+bool ends_with(std::string const &str, std::string const &suffix) {
+    if (str.length() < suffix.length()) 
+        return false;
+    return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
+}
 
 
 class PrintExecutor: public CustomPredicateExecutor {
@@ -18,6 +26,18 @@ class PrintExecutor: public CustomPredicateExecutor {
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             std::cout << scope->get("text")->name() << std::endl;
             return scope->get("text");
+        }
+};
+
+class InputExecutor: public CustomPredicateExecutor {
+    public:
+        InputExecutor(): CustomPredicateExecutor("read(prompt)") {
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            std::cout << scope->get("prompt")->name();
+            std::string input;
+            std::getline(std::cin, input);
+            return std::make_shared<String>(input);
         }
 };
 
@@ -122,9 +142,6 @@ class IfExecutor: public CustomPredicateExecutor {
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
         }
-        std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope) {
-            return scope;
-        }
         std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope){
             return expression;
         }
@@ -144,9 +161,6 @@ class IfElseExecutor: public CustomPredicateExecutor {
         }
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
-        }
-        std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope) {
-            return scope;
         }
         std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope){
             return expression;
@@ -169,18 +183,15 @@ class WhileExecutor: public CustomPredicateExecutor {
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
         }
-        std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope) {
-            return scope;
-        }
         std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope){
             return expression;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> condition = scope->get("condition");
-            std::shared_ptr<Object> block = scope->get("loop");
             std::shared_ptr<Object> ret = std::shared_ptr<Object>(nullptr);
-            while(std::dynamic_pointer_cast<Number>(condition->value(scope))->value())
-                ret = block->value(scope);
+            auto condition = scope->get("condition");
+            auto loop = scope->get("loop");
+            while(std::dynamic_pointer_cast<Number>(condition->value(scope))->value()) 
+                ret = loop->value(scope);
             return ret;
         }
 };
@@ -200,8 +211,13 @@ class LoadExecutor: public CustomPredicateExecutor {
         std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope) {
             return scope;
         }
+        std::shared_ptr<Scope> descoped(std::shared_ptr<Scope> scope) {
+            return scope;
+        }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::string source = readfile(scope->get("path")->name());
+            std::string source = scope->get("path")->name();
+            if(ends_with(source, ".ns"))
+                source = readfile(source);
             return parse(source)->value(scope);
         }
 };
@@ -214,12 +230,13 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     std::string file = argv[1];*/
-    std::string file = "test.ns";
+    std::string source = "cli.ns";
     if(argc>1)
-        file = argv[1];
-    std::string source = readfile(file);
+        source = argv[1];
+    source = "run('"+source+"')";
     auto global = std::make_shared<Scope>();
     global->load(std::make_shared<PrintExecutor>());
+    global->load(std::make_shared<InputExecutor>());
     global->load(std::make_shared<DetachExecutor>());
     global->load(std::make_shared<AddExecutor>());
     global->load(std::make_shared<MulExecutor>());

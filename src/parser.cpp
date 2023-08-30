@@ -11,6 +11,7 @@
 #include "Scoped.h"
 #include "Unscoped.h"
 #include "Access.h"
+#include "Edit.h"
 #include "String.h"
 #include "Predicate.h"
 #include "PredicatePart.h"
@@ -41,9 +42,12 @@ class Callable: public CustomPredicateExecutor {
             //    return scope->enter();
             return scope->enter();
         }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+        std::shared_ptr<Scope> descoped(std::shared_ptr<Scope> scope) {
             if(std::dynamic_pointer_cast<Scoped>(call_) == nullptr)
                 scope->set("new", scope->get("super"));
+            return scope;
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             return call_->value(scope);
         }
         const std::string name() const {
@@ -67,11 +71,16 @@ std::vector<std::string> tokenize(const std::string& source) {
     char last_parenthesis_close = ' ';
     int sN = source.length();
     bool comments = false;
+    bool string_mode = false;
     for(int i=0;i<sN;i++){
         char c = source[i];
-        if(c=='/' && i<sN-1 && source[i+1]=='/')
+        if(c=='"')
+            c = '\'';
+        if(c=='\'')
+            string_mode = !string_mode;
+        if(c=='/' && i<sN-1 && source[i+1]=='/' && !string_mode)
             comments = true;
-        if(c=='\n') {
+        if(c=='\n' && !string_mode) {
             c = ' ';
             comments = false;
         }
@@ -82,7 +91,7 @@ std::vector<std::string> tokenize(const std::string& source) {
         if(!isalpha(c) && !isdigit(c)) {
             if(pending.length())
                 tokens.push_back(pending);
-            if(c==',' && last_parenthesis!=',') {
+            if(c==',' && last_parenthesis!=',' && !string_mode) {
                 tokens.push_back(std::string(1, last_parenthesis_close));
                 tokens.push_back(std::string(1, last_parenthesis));
             }
@@ -212,6 +221,7 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
             return std::make_shared<Sequence>(first, second);
         }
     }
+    int pos_access = -1;
     for(int i=from;i<=to;i++) {
         std::string c = tokens[i];
         if(c=="{" || c=="(" || c=="[")
@@ -224,8 +234,16 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
             return std::make_shared<Callable>(predicate_parts(tokens, from, i-1), parse(tokens, i+1, to));
         if(tokens[i]=="=")
             return std::make_shared<Assign>(parse(tokens, from, i-1), parse(tokens, i+1, to));
-        if(tokens[i]==".")
-            return std::make_shared<Access>(parse(tokens, from, i-1), parse(tokens, i+1, to));
+        if(tokens[i]=="."){
+            pos_access = i;
+            if(pos_access!=-1)
+                return std::make_shared<Access>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
+        }
+        if(tokens[i]==":"){
+            pos_access = i;
+            if(pos_access!=-1)
+                return std::make_shared<Edit>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
+        }
     }
 
     // convert to variable if only one token remaining

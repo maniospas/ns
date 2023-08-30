@@ -1,0 +1,19 @@
+print('-----------------------------------------------');
+print('          NS command line interface');
+print('    Author: Emmanouil (Manios) Krasanakis');
+print('    Github: https://github.com/maniospas/ns');
+print('');
+print('  Interpreter without interface: ns file.ns');
+print('');
+print('  Instructions');
+print('    Write code in each line to execute.');
+print('    Write exit to terminate.');
+print('-----------------------------------------------');
+cli = 1;
+exit := (cli = 0;'NS command line terminated.');
+output = ( // allow self-modification
+	while(cli) (
+		run(read('> '))
+	)
+);
+print(output)

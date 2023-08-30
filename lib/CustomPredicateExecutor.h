@@ -17,6 +17,7 @@ class CustomPredicateExecutor: public Object {
         CustomPredicateExecutor(const std::string& text);
         virtual ~CustomPredicateExecutor();
         virtual std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope);
+        virtual std::shared_ptr<Scope> descoped(std::shared_ptr<Scope> scope);
         virtual std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope);
         virtual std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope);
         const std::string name() const;

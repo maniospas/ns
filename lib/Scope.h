@@ -13,7 +13,10 @@ class Scope: public Object {
     public:
         Scope(const std::shared_ptr<Object> parent=std::shared_ptr<Object>(nullptr),
               const std::shared_ptr<Object> surface=std::shared_ptr<Object>(nullptr),
-              const std::shared_ptr<Scope> prototype=std::shared_ptr<Scope>(nullptr));
+              const std::shared_ptr<Scope> prototype=std::shared_ptr<Scope>(nullptr),
+              const std::shared_ptr<Scope> fallback=std::shared_ptr<Scope>(nullptr),
+              const std::shared_ptr<Scope> fallfront=std::shared_ptr<Scope>(nullptr)
+              );
         virtual ~Scope();
         void set(const std::string& name, const std::shared_ptr<Object> value);
         std::shared_ptr<Object> get(const std::string& name);

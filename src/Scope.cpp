@@ -5,11 +5,18 @@
 
 
 
-Scope::Scope(const std::shared_ptr<Object> parent, const std::shared_ptr<Object> surface, const std::shared_ptr<Scope> prototype) {
+Scope::Scope(const std::shared_ptr<Object> parent, 
+    const std::shared_ptr<Object> surface, 
+    const std::shared_ptr<Scope> prototype,
+    const std::shared_ptr<Scope> fallback,
+    const std::shared_ptr<Scope> fallfront
+    ) {
+    values["new"] = surface;
+    values["super"] = parent;
     if(prototype!=nullptr)
         values = prototype->values;
-    values["super"] = parent;
-    values["new"] = surface;
+    values["fallback"] = fallback;
+    values["fallfront"] = fallfront;
 }
 
 Scope::~Scope() {
@@ -25,15 +32,26 @@ void Scope::set(const std::string& name, const std::shared_ptr<Object> value) {
 }
 
 std::shared_ptr<Object> Scope::get(const std::string& name) {
-    if(name=="new")
+    if(name=="new")// && values["new"] == nullptr)
         return shared_from_this();
+    if(values["fallfront"]!=nullptr) {
+        std::shared_ptr<Object> ret = values["fallfront"]->get(name);
+        if(ret!=nullptr)
+            return ret;
+    }
     auto it = values.find(name);
     if(it==values.end()) {
+        std::shared_ptr<Object> ret;
+        /*auto new_ = values.find("new");
+        if(new_!=values.end() && new_->second!=nullptr && (ret=new_->second->get(name))!=nullptr)
+            return ret;*/
         auto parent_ = values.find("super");
-        if(parent_!=values.end() && parent_->second!=nullptr)
-            return parent_->second->get(name);
-        error("Variable does not exist: "+name);
-        //return std::shared_ptr<Object>(nullptr);
+        if(parent_!=values.end() && parent_->second!=nullptr && (ret=parent_->second->get(name))!=nullptr)
+            return ret;
+        auto fallback_ = values.find("fallback");
+        if(fallback_!=values.end() && fallback_->second!=nullptr && (ret=fallback_->second->get(name))!=nullptr)
+            return ret;
+        return std::shared_ptr<Object>(nullptr);
     }
     return it->second;
 }
@@ -45,13 +63,11 @@ std::shared_ptr<Scope> Scope::enter() {
 const std::string Scope::name() const {
     std::string desc = "{";
     for(auto it=values.begin(); it!=values.end();++it) {
-      if(it->first=="super")
-        continue;
-      if(it->first=="new") {
+      /*if(it->first=="new") {
         if(it->second!=nullptr)
-            desc += it->second->name().substr(1, -1)+";";
+            desc += "("+it->second->name().substr(1, -1)+");";
         continue;
-      }
+      }*/
       if(it->first[0]!='[') {
           desc += it->first;
           desc += "=";
