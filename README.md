@@ -108,39 +108,36 @@ NS creates an exception due to ambiguity.
 Resolve this by replacing the access with either a *fallfront* (#) or *fallback* (:) operator.
 
 Of the two, *fallfront* means
-that any variable values will first be looked at the scope being entered from. For example, the 
-snippet `a:={x=0;new};{y=5;a.x=y};print(a.x)` will correctly print 5. But this makes it 
-tricky reading fields or fomulas already defined in the accesor scope.
-For example, the snippet
-`a={x=0;new};x=5;print(a.x)` will print 5, even if internally the value x of
-a still holds value 0, because the fallfront operator overrides names.
-
-
+that any variable values will first be looked at the scope being entered from. This makes it 
+tricky reading fields or fomulas already defined in the accesor scope. 
 To prioritize internal variable values or formula implementations 
-for accessed scopes, use the *fallback* operator `:`.
-This has the inverse risk of not setting scope members if they also exist on the scope
-being entered from.
+for accessed scopes, use the *fallback* operator `:`. Here are some examples of fallback 
+and fallfront:
 
 
-:bulb: To avoid unexpected behavior, use fallfronts
-to safe write to scopes, and fallbacks to safe read from scopes.
-Best practices are enforced by usign simple access, but sometimes
+```cpp
+a:={x=0;new};{x=5;a#x=x};print(a#x) // 5
+a={x=0;new};x=5;print(a#x) // 5 (but x within a is 0)
+a={x=0;new};x=5;print(a:x) // 0
+```
+
+:bulb: To avoid unexpected behavior, use fallfront (#)
+to safe write to scopes, and fallback (:) to safe read from scopes.
+Best practices are enforced by simple access (.), but sometimes
 the other two options are needed to perform complex stuff.
 
 
 # Examples
 
-
 The following example shows how to override a formula using the fallback operation.
-Basically, we store a `base` scope that will help us define a new formula vermula
-in the new one `stricter` by just assigning to the formula in the latter and fallbacking
-on the base to implement it. We can then fallback to `stricter` to run the formula
-there.
+Basically, it stores a `base` scope that will help define a new version of the
+inequality formula in the scope `stricter` by fallbacking on the base during implement. 
+We can fallback to `stricter` to run its version of inequality.
 
 
 ```cpp
 stricter = {
-    base=super; // alternative have base=new; on the top level and pop(super) here to minimize the logic
+    base=super; // alternatively, have base=new; on the top level and pop(super) here to minimize the logic
     (x)<(y) := {
         base: ((x)<((y)-(1))) // computation under the base scope
     };
@@ -150,5 +147,5 @@ comp = stricter:(1)<(2); // test a comparison under the new scope
 print(comp)
 ```
 
-:bulb: In both cases, using a fallfront (.) instead of a fallback (:) would fail; 
+:bulb: In both cases, using a fallfront (#) instead of a fallback (:) would fail; 
 it would respectively create an infinite recursion, and apply the base inequality.

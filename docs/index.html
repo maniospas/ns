@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NS language</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+	
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const contentPlaceholder = document.getElementById("content-placeholder");
+			const navLinks = document.querySelectorAll(".nav-link");
+
+			navLinks.forEach((link) => {
+				link.addEventListener("click", function (event) {
+					event.preventDefault();
+					const page = this.getAttribute("data-page");
+					loadContent(page);
+				});
+			});
+
+			function loadContent(page) {
+				const xhr = new XMLHttpRequest();
+				xhr.open("GET", page + ".html", true);
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState === 4 && xhr.status === 200) {
+						contentPlaceholder.innerHTML = xhr.responseText;
+					}
+				};
+				xhr.send();
+			}
+			
+			loadContent("home");
+		});
+	</script>
+	
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+	<a class="navbar-brand" href="#">
+		<img src="ns.png" alt="NS" width="50">
+	</a>
+	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item active">
+				<a class="nav-link" href="#"  data-page="home">Home</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" data-page="documentation">Documentation</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" data-page="tutorials">Tutorials</a>
+			</li>
+			<!-- Add more navigation items as needed -->
+		</ul>
+	</div>
+</div>
+</nav>
+
+
+<div id="content-placeholder">
+    <!-- Dynamic content will be loaded here -->
+</div>
+
+
+</body>
+</html>
