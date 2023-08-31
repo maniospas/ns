@@ -142,7 +142,7 @@ there.
 stricter = {
     base=super; // alternative have base=new; on the top level and pop(super) here to minimize the logic
     (x)<(y) := {
-        base: ((x)<((y)-(1))) // computation under the system scope
+        base: ((x)<((y)-(1))) // computation under the base scope
     };
     new
 };
