@@ -19,58 +19,31 @@
 	</button>
 	<div class="collapse navbar-collapse" id="navbarNav">
 		<ul class="navbar-nav ml-auto">
-			<li class="nav-item active">
-				<a class="nav-link custom-navigation-option" href="#"  data-page="home">Home</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link custom-navigation-option" href="#"  data-page="start">Get started</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link custom-navigation-option" href="#" data-page="documentation">Documentation</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link custom-navigation-option" href="#" data-page="tutorials">Tutorials</a>
-			</li>
-			<!-- Add more navigation items as needed -->
+			<li class="nav-item active"><a class="nav-link" href="index.html">Home</a></li>
+			<li class="nav-item"><a class="nav-link" href="start.html">Get started</a></li>
+			<li class="nav-item"><a class="nav-link" href="syntax.html">Syntax</a></li>
+			<li class="nav-item"><a class="nav-link" href="tutorials.html" data-page="tutorials">Tutorials</a></li>
 		</ul>
 	</div>
 </div>
 </nav>
 
 
-<div id="content-placeholder">
-    <!-- Dynamic content will be loaded here -->
+<!-- Add content here -->
+
+<div class="container mt-4">
+	<div class="jumbotron">
+		<h1 class="display-4">Welcome to NS</h1>
+		<p class="lead">An dynamic self-mofifying language.</p>
+		<hr class="my-4">
+	</div>
+	<p>Work with a language that defines new programming structures in the same way as methods - you can use it to even interpret new languages! Enjoy a dynamic environment that still offers assignment-safe scopes, and learn to create objects by making scopes return themselves. And, best of all, get fast implementations for scientific computations.</p>
 </div>
 
 
-
-<script>
-	document.addEventListener("DOMContentLoaded", function () {
-		const contentPlaceholder = document.getElementById("content-placeholder");
-		const navLinks = document.querySelectorAll(".custom-navigation-option");
-
-		navLinks.forEach((link) => {
-			link.addEventListener("click", function (event) {
-				event.preventDefault();
-				const page = this.getAttribute("data-page");
-				loadContent(page);
-			});
-		});
-
-		function loadContent(page) {
-			const xhr = new XMLHttpRequest();
-			xhr.open("GET", page + ".html", true);
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState === 4 && xhr.status === 200) {
-					contentPlaceholder.innerHTML = xhr.responseText;
-				}
-			};
-			xhr.send();
-		}
-		
-		loadContent("home");
-	});
-</script>
+<div class="container mt-4">
+<a class="btn btn-primary btn-lg" href="#" role="button">Download</a> <a class="btn btn-primary btn-lg" href="start.html" role="button" data-page="start">Get started</a>
+</div>
 
 </body>
 </html>

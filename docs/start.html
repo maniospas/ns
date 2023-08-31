@@ -1,6 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NS language</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+	<link href="prism.css" rel="stylesheet">
+    <script src="prism.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+	<a class="navbar-brand" href="#">
+		<img src="ns.png" alt="NS" width="50">
+	</a>
+	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item active"><a class="nav-link" href="index.html">Home</a></li>
+			<li class="nav-item"><a class="nav-link" href="start.html">Get started</a></li>
+			<li class="nav-item"><a class="nav-link" href="syntax.html">Syntax</a></li>
+			<li class="nav-item"><a class="nav-link" href="tutorials.html" data-page="tutorials">Tutorials</a></li>
+		</ul>
+	</div>
+</div>
+</nav>
+
+
 <div class="container mt-4">
 	<div class="jumbotron">
-		<h1 class="display-4">Get started</h1>
+		<h1 class="display-4">Get started with NS</h1>
 	</div>
 	
 	<div class="container mt-3">
@@ -8,10 +39,43 @@
 		<div class="col-md-4">
 			<div class="card">
 				<div class="card-body">
-					<h2 class="card-title">Scopes</h2>
-					<p class="card-text">Use the new and super keywords to access</p>
-					<p class="card-text">You can explain features, concepts, syntax, and more.</p>
-					<pre><code class="language-cpp">a={new}</code></pre>
+					<h2 class="card-title">Assignment safety</h2>
+					<p class="card-text">Use a bracket scope to prevent any assignment from leaking to enclosing scopes.</p>
+					<pre><code class="language-cpp">x = 0;
+{
+	x = x + 1;
+	print(x);  //prints 1
+};
+print(x); //prints 0</code></pre>
+				<p class="card-text">Enclose code in a parentheses scope to transfer all assignments to the parent scope.</p>
+					<pre><code class="language-cpp">x = 0;
+(
+	x = x + 1;
+	print(x);  //prints 1
+);
+print(x); //prints 1</code></pre>
+
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-body">
+					<h2 class="card-title">Scope return value</h2>
+					<p class="card-text">Do not put a semicolon after the last expression to make it be the outcome of running the scope.</p>
+					<pre><code class="language-cpp">x = 0;
+y = { //assignment safety
+	x = x + 2; 
+	x * x
+};
+print(y); //prints 4</code></pre>
+					<p class="card-text"><b>new</b> references the scope object itself. Return it and access its contents with the dot notation.</p>
+					<pre><code class="language-cpp">x = 0;
+y = { //assignment safety
+	z = x+1;
+	new
+};
+print(y.z); //prints 1</code></pre>
 				</div>
 			</div>
 		</div>
@@ -19,9 +83,30 @@
 			<div class="card">
 				<div class="card-body">
 					<h2 class="card-title">Metaprogramming</h2>
-					<p class="card-text">Use the new and super keywords to access</p>
-					<p class="card-text">You can explain features, concepts, syntax, and more.</p>
-					<pre><code class="language-cpp">a={new}</code></pre>
+					<p class="card-text">Define formulas for pending evaluation with the := operator. This is more general than defining methods.</p>
+					<pre><code class="language-cpp">add(x,y) := {x+y}; // assign a formula
+sub (z) from (x,y) := {x+y-z};
+Point(x,y) := { // x, y in superscope
+	elem sum := x+y; // no argument
+	new // basically a constructor
+}; 
+print(add(1,2)); // prints 3
+print(sub (add(1,2)) from (1,2)) // 0
+print(Point(1,2).x) // prints 1 
+print(Point(1,2).elem sum) // prints 3
+</code></pre>
+					<p class="card-text">The colon operator enters a scope from a foreign superscope while prioritizing the former's internal variable values. Use this to override any statement.</p>
+					<pre><code class="language-cpp">stricter = {
+    base=super; //keep superscope
+    (x)<(y) := { // changes super
+        base: ( // run in base scope
+			(x)<((y)-(1))
+		) 
+    };
+    new
+};
+print(stricter:(1)<(2)); // modified
+</pre></code>
 				</div>
 			</div>
 		</div>
@@ -29,3 +114,9 @@
 	  </div>
 	</div>
 </div>
+
+
+
+
+</body>
+</html>
