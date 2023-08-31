@@ -5,6 +5,8 @@ NS is an interpreted language that treats variable scopes as objects and vice ve
 **License:** Apache 2<br>
 **Status:** The core language interpreter is still being developed
 
+Documentation: https://maniospas.github.io/ns
+
 
 1. [Setup](#setup-windows)
 2. [Scopes, self-reference, objects](#scopes-self-reference-objects)
