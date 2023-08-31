@@ -1,11 +1,11 @@
 Point(x,y) := {norm:=((x)+(y)); set x(value):=(x=value); set y(value):=(y=value);new};
 a = Point(1,2);
-{
+{ // test fallfront
 	y = 5;
-	a.set x (y);
-	a.set y (y);
+	a#set x (y);
+	a#set y (y);
 	y = 4;
-	print(a.y)
+	print(a#y);
 };
 print(a.x);
 print(a.y);

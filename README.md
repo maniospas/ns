@@ -9,7 +9,9 @@ NS is an interpreted language that treats variable scopes as objects and vice ve
 1. [Setup](#setup-windows)
 2. [Scopes, self-reference, objects](#scopes-self-reference-objects)
 3. [Formulas, methods, constructors](#formulas-methods-constructors)
-4. [External scope calls](#external-scope-calls)
+4. [Fallfronts and fallbacks (resolve variable value conflict)](#fallfronts-and-fallbacks-resolve-variable-value-conflict)
+5. [Examples](#examples)
+
 
 # Setup (windows)
 *The language is still under development, and only a windows distribution is available.*
@@ -96,7 +98,57 @@ Point(x,y) := Point(x,y,0);
 Use objects to pass keyword arguments or arguments that you don’t want to remain in the object’s scope.
 
 
-# External scope calls
+# Fallfronts and fallbacks (resolve variable value conflict)
+
+We previously used `.` to enter a scope and both edit its contents and retrieve fields.
+This is referred to as scope *access*. But, when a variable or formula is found
+in both the entered and entrant scopes (e.g., because the entrant is bracketed and the 
+assigned variable value does not trickle down to a common ancestor),
+NS creates an exception due to ambiguity.
+Resolve this by replacing the access with either a *fallfront* (#) or *fallback* (:) operator.
+
+Of the two, *fallfront* means
+that any variable values will first be looked at the scope being entered from. For example, the 
+snippet `a:={x=0;new};{y=5;a.x=y};print(a.x)` will correctly print 5. But this makes it 
+tricky reading fields or fomulas already defined in the accesor scope.
+For example, the snippet
+`a={x=0;new};x=5;print(a.x)` will print 5, even if internally the value x of
+a still holds value 0, because the fallfront operator overrides names.
 
 
+To prioritize internal variable values or formula implementations 
+for accessed scopes, use the *fallback* operator `:`.
+This has the inverse risk of not setting scope members if they also exist on the scope
+being entered from.
 
+
+:bulb: To avoid unexpected behavior, use fallfronts
+to safe write to scopes, and fallbacks to safe read from scopes.
+Best practices are enforced by usign simple access, but sometimes
+the other two options are needed to perform complex stuff.
+
+
+# Examples
+
+
+The following example shows how to override a formula using the fallback operation.
+Basically, we store a `base` scope that will help us define a new formula vermula
+in the new one `stricter` by just assigning to the formula in the latter and fallbacking
+on the base to implement it. We can then fallback to `stricter` to run the formula
+there.
+
+
+```cpp
+stricter = {
+    base=super; // alternative have base=new; on the top level and pop(super) here to minimize the logic
+    (x)<(y) := {
+        base: ((x)<((y)-(1))) // computation under the system scope
+    };
+    new
+};
+comp = stricter:(1)<(2); // test a comparison under the new scope
+print(comp)
+```
+
+:bulb: In both cases, using a fallfront (.) instead of a fallback (:) would fail; 
+it would respectively create an infinite recursion, and apply the base inequality.

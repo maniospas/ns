@@ -9,6 +9,7 @@ Scope::Scope(const std::shared_ptr<Object> parent,
     const std::shared_ptr<Object> surface, 
     const std::shared_ptr<Scope> prototype,
     const std::shared_ptr<Scope> fallback,
+    const std::shared_ptr<Scope> failback,
     const std::shared_ptr<Scope> fallfront
     ) {
     values["new"] = surface;
@@ -16,6 +17,7 @@ Scope::Scope(const std::shared_ptr<Object> parent,
     if(prototype!=nullptr)
         values = prototype->values;
     values["fallback"] = fallback;
+    values["failback"] = failback;
     values["fallfront"] = fallfront;
 }
 
@@ -31,12 +33,25 @@ void Scope::set(const std::string& name, const std::shared_ptr<Object> value) {
         values[name] = value;
 }
 
+std::shared_ptr<Object> Scope::overlap(const std::string& name, const std::shared_ptr<Object> value) {
+    if(values["failback"]!=nullptr) {
+        std::shared_ptr<Object> ret = values["failback"]->get(name);
+        if(ret!=nullptr) {
+            if(value==nullptr)
+                return ret;
+            if(ret.get()!=value.get())
+                error("Variable value conflict between entrant and accessed (.) scope: disambiguate with fallback(:) or fallfront(#)");
+        }
+    }
+    return value;
+}
+
 std::shared_ptr<Object> Scope::get(const std::string& name) {
     if(name=="new")// && values["new"] == nullptr)
         return shared_from_this();
     if(values["fallfront"]!=nullptr) {
         std::shared_ptr<Object> ret = values["fallfront"]->get(name);
-        if(ret!=nullptr)
+        if(ret!=nullptr) 
             return ret;
     }
     auto it = values.find(name);
@@ -47,13 +62,13 @@ std::shared_ptr<Object> Scope::get(const std::string& name) {
             return ret;*/
         auto parent_ = values.find("super");
         if(parent_!=values.end() && parent_->second!=nullptr && (ret=parent_->second->get(name))!=nullptr)
-            return ret;
+            return overlap(name, ret);
         auto fallback_ = values.find("fallback");
         if(fallback_!=values.end() && fallback_->second!=nullptr && (ret=fallback_->second->get(name))!=nullptr)
-            return ret;
-        return std::shared_ptr<Object>(nullptr);
+            return overlap(name, ret);
+        return overlap(name, std::shared_ptr<Object>(nullptr));
     }
-    return it->second;
+    return overlap(name, it->second);
 }
 
 std::shared_ptr<Scope> Scope::enter() {

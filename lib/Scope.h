@@ -10,11 +10,13 @@ class CustomPredicateExecutor;
 class Scope: public Object {
     private:
         std::map<std::string, std::shared_ptr<Object>> values;
+        std::shared_ptr<Object> overlap(const std::string& name, const std::shared_ptr<Object> value);
     public:
         Scope(const std::shared_ptr<Object> parent=std::shared_ptr<Object>(nullptr),
               const std::shared_ptr<Object> surface=std::shared_ptr<Object>(nullptr),
               const std::shared_ptr<Scope> prototype=std::shared_ptr<Scope>(nullptr),
               const std::shared_ptr<Scope> fallback=std::shared_ptr<Scope>(nullptr),
+              const std::shared_ptr<Scope> failback=std::shared_ptr<Scope>(nullptr),
               const std::shared_ptr<Scope> fallfront=std::shared_ptr<Scope>(nullptr)
               );
         virtual ~Scope();

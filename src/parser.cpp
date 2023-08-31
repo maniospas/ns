@@ -12,6 +12,7 @@
 #include "Unscoped.h"
 #include "Access.h"
 #include "Edit.h"
+#include "Fallfront.h"
 #include "String.h"
 #include "Predicate.h"
 #include "PredicatePart.h"
@@ -137,6 +138,14 @@ std::vector<std::string> tokenize(const std::string& source) {
             merged_tokens.push_back(token+next_token);
             i += 2;
         }
+        /*else if(token=="-" && next_token==">") {
+            merged_tokens.push_back(".");
+            i += 2;
+        }
+        else if(token=="-" && next_token=="<") {
+            merged_tokens.push_back(":");
+            i += 2;
+        }*/
         else {
             merged_tokens.push_back(token);
             i++;
@@ -146,6 +155,8 @@ std::vector<std::string> tokenize(const std::string& source) {
 }
 
 std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to) {
+    if(from>to)
+        return std::shared_ptr<Object>(nullptr);
     // trim
     while(tokens[from]==" " && from<to)
         from += 1;
@@ -242,6 +253,11 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
             pos_access = i;
             if(pos_access!=-1)
                 return std::make_shared<Edit>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
+        }
+        if(tokens[i]=="#"){
+            pos_access = i;
+            if(pos_access!=-1)
+                return std::make_shared<Fallfront>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
         }
     }
 

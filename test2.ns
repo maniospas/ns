@@ -1,12 +1,11 @@
 utils = {run('utils.ns')};
 r = utils.range(0, 10);
-x = 0;
+data = {x=0;new};
 while(r.next) {
 	r2 = utils.range(0, 10);
 	while(r2.next) {
-		print('exec');
-		data.x = (data.x)+(1)
-	}
+		data.x = (data.x)+(1);
+	};
 };
 print(data.x);
 new

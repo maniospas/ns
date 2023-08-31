@@ -1,0 +1,17 @@
+stricter = {
+    base=super; // alternative have base=new; on the top level and pop(super) here to minimize the logic
+    (x)<(y) := {
+        base: ((x)<((y)-(1))) // computation under the system scope
+    };
+    new
+};
+{
+	i = 1;
+	j = 1;
+	print(stricter:(i)<(j));
+	print(stricter:(1)<(2));
+	print(stricter#(1)<(2)); // for fallfront, prioritize base implementation
+	print(stricter:(1)<(3));
+	new
+};
+new
