@@ -36,80 +36,80 @@
 	
 	<div class="container mt-3">
 	  <div class="row">
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<div class="card">
 				<div class="card-body">
-					<h2 class="card-title">Assignment safety</h2>
-					<p class="card-text">Use a bracket scope to prevent any assignment from leaking to enclosing scopes.</p>
+					<h2 class="card-title">Safe assign</h2>
+					<p class="card-text">Use a bracket scope to prevent any assignment from leaking to enclosing superscopes.</p>
 					<pre><code class="language-cpp">x = 0;
-{
-	x = x + 1;
-	print(x);  //prints 1
-};
-print(x); //prints 0</code></pre>
-				<p class="card-text">Enclose code in a parentheses scope to transfer all assignments to the parent scope.</p>
+{x = x + 1;print(x);}; //1
+print(x); //0</code></pre>
+				<p class="card-text">Enclose code in a parentheses scope to transfer all assignments to the superscope.</p>
 					<pre><code class="language-cpp">x = 0;
-(
-	x = x + 1;
-	print(x);  //prints 1
-);
-print(x); //prints 1</code></pre>
+(x = x + 1;print(x);); //1
+print(x); //1</code></pre>
 
 				</div>
 			</div>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<div class="card">
 				<div class="card-body">
-					<h2 class="card-title">Scope return value</h2>
-					<p class="card-text">Do not put a semicolon after the last expression to make it be the outcome of running the scope.</p>
+					<h2 class="card-title">Scope value</h2>
+					<p class="card-text">Do not put a semicolon after the last expression to make it the value of running the scope.</p>
 					<pre><code class="language-cpp">x = 0;
-y = { //assignment safety
-	x = x + 2; 
-	x * x
-};
-print(y); //prints 4</code></pre>
+y = {x = x+2; x*x};
+print(y); //4</code></pre>
 					<p class="card-text"><b>new</b> references the scope object itself. Return it and access its contents with the dot notation.</p>
 					<pre><code class="language-cpp">x = 0;
-y = { //assignment safety
-	z = x+1;
-	new
-};
-print(y.z); //prints 1</code></pre>
+y = {z = x+1; new};
+print(y.z); //1</code></pre>
 				</div>
 			</div>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<div class="card">
 				<div class="card-body">
-					<h2 class="card-title">Metaprogramming</h2>
-					<p class="card-text">Define formulas for pending evaluation with the := operator. This is more general than defining methods.</p>
-					<pre><code class="language-cpp">add(x,y) := {x+y}; // assign a formula
+					<h2 class="card-title">Formulas</h2>
+					<p class="card-text">Create formulas with :=. These are more general than methods.</p>
+					<pre><code class="language-cpp">add(x,y) := {x+y};
 sub (z) from (x,y) := {x+y-z};
-Point(x,y) := { // x, y in superscope
-	elem sum := x+y; // no argument
-	new // basically a constructor
+Point(x,y) := { //views x,y
+  el sum := x+y;
+  new //constructor
 }; 
-print(add(1,2)); // prints 3
-print(sub (add(1,2)) from (1,2)) // 0
-print(Point(1,2).x) // prints 1 
-print(Point(1,2).elem sum) // prints 3
+print(add(1,2)); //3
+print(sub (3) from (1,2)) //0
+print(Point(1,2).x) //1 
+print(Point(1,2).el sum) //3
 </code></pre>
-					<p class="card-text">The colon operator enters a scope from a foreign superscope while prioritizing the former's internal variable values. Use this to override any statement.</p>
-					<pre><code class="language-cpp">stricter = {
-    base=super; //keep superscope
-    (x)<(y) := { // changes super
-        base: ( // run in base scope
-			(x)<((y)-(1))
-		) 
-    };
-    new
+				</div>
+			</div>
+		</div>
+		
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body">
+					<h2 class="card-title">Self-modification</h2>
+		
+					<p class="card-text">The colon enters a scope. It uses the scope from where it is called as a fallback variable getter. Override any formula like so.</p>
+					<pre><code class="language-cpp">system = new; // keep system
+stricter = {
+  (x)<(y) := {
+    system: ( //in system
+      (x)<((y)-(1))
+    ) 
+  };
+  new
 };
-print(stricter:(1)<(2)); // modified
+print(stricter:(1)<(2)); //modified
 </pre></code>
 				</div>
 			</div>
 		</div>
+		
+		
+		
 		
 	  </div>
 	</div>
