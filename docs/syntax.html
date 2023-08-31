@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NS language</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+	<link href="prism.css" rel="stylesheet">
+    <script src="prism.js"></script>
+	<style>
+    .sidebar {
+      position: fixed;
+	  width:200px;
+      top: 12px;
+      bottom: 0;
+      left: 0px;
+      z-index: 100;
+      padding: 48px 0;
+      background-color: #f8f9fa;
+    }
+	
+	.navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    .main-content {
+      margin-left: 200px; /* Adjust this to match sidebar width */
+      margin-top: 56px; /* Height of the navbar */
+    }
+	
+	.smaller-font {
+		margin-left: 10px;
+		margin-top: -10px;
+		font-size: 0.8em; /* Adjust the value as needed */
+	}
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+	<a class="navbar-brand" href="#">
+		<img src="ns.png" alt="NS" width="50">
+	</a>
+	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+			<li class="nav-item"><a class="nav-link" href="start.html">Get started</a></li>
+			<li class="nav-item active"><a class="nav-link text-primary" href="syntax.html">Syntax</a></li>
+			<li class="nav-item"><a class="nav-link" href="tutorials.html" data-page="tutorials">Tutorials</a></li>
+		</ul>
+	</div>
+	</div>
+</nav>
+
+
+<div class="container main-content">
+	
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav class="col-md-3 col-lg-2 d-md-block bg-white sidebar">
+      <div class="position-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="#language-core">
+              Language core
+            </a>
+            <ul class="nav flex-column ml-3">
+              <li class="nav-item"><a class="nav-link smaller-font" href="#assignment-scope">Assignment scope</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#scopes-as-objects">Scopes as objects</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#custom-expressions">Custom expressions</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#scope-access">Scope access</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#control-flow">
+              Control flow
+            </a>
+			<ul class="nav flex-column ml-3">
+              <li class="nav-item"><a class="nav-link smaller-font" href="#if">if</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#while">while</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#arithmetics">Arithmetics</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+	
+      <div class="pt-3 pb-2 mb-3">
+		<div class="jumbotron">
+			<h1 class="display-4">NS syntax</h1>
+		</div>
+      </div>
+      
+      <section id="language-core">
+        <h1>Language core</h1>
+        <p>NS emphasizes the concept of treating scopes, blocks of code, and objects interchangeably.
+		This creates an interface that is easy to learn but provides many powerful options on designing
+		code, including the ability of programs to alter their own source code. 
+		</p>
+        <section id="assignment-scope">
+          <h4>Assignment scope</h4>
+		  <p>NS refers to <it>scopes</it> as blocks of code with clearly understood rule of which variables or formulas/programming commands they can access. We we talk about formulas later, and now focus on setting and accessing variables.
+		  </p>
+		  <p>Starting from a top-level scope, new ones can be declared inside it and separated by a semicolon. Scopes can be enclosed inside brackets or parentheses. Parentheses can also be ommited when running a single formula, such as assignment or printing. Of the two types, <it>bracketed scopes do not modify external variables</it> unless they explicitly access them via objects (more on this later). The following snippet demonstrates bracket and parentehesis scopes in action.
+		  </p>
+
+<pre><code class="language-cpp">x = 0;
+{
+	x = 1;
+	print(x); //0
+};
+print(x); //1
+(
+	x = 1;
+	print(x); //0
+);
+print(x); //1</code></pre>
+        
+		<p>The last expression of scopes does not need to be followed by a semicolon and is actually a returned value. For example, you can have a large bracketed scope that only outputs a value at the end. In general, prefer using bracketed scopes for safe assignments, but parentheses scopes have lesser overhead. The following snippet demonstrates assignment of values from scopes.</p>
+		
+<pre><code class="language-cpp">y = {
+	x = 1;
+	x
+};
+print(y); //1</code></pre>
+		
+        </section>
+        
+        <section id="scopes-as-objects">
+          <h4>Scopes as objects</h4>
+          <p>Scopes can view themselves like objects that hold their assigned variables. This view is obtained with the <it>new</it> variable. Object fields can be retrieved with the dot operator. What actually happens is a little more nuanced (the dot operator is one of the available types of scope access), but this understanding suffices to get a first example going. You can naturally return <it>new</it> from the scope itself to effectively generate an object, as demonstrated in the snippet below.</p>
+<pre><code class="language-cpp">point = {
+	x = 1;
+	y = 2;
+	new
+};
+print(point.x); //1
+print(point.y); //1</code></pre>
+        </section>
+		
+		<p>All scopes have some additional variables (<it>super,fallback,failback,fallfront</it>) that are internally consulted for retrieval of variable values. First let as look at <it>super</it>; this is the superscope, that is scope in which <it>new</it> was originally constructed. This is the same as <it>new</it> for parentheses scopes, but is otherwise one level of hierarchy higher in a scope dependency hiererarchy.</p>
+		
+		<p>When trying to read a variable and this does not exist in the scope, this is retrieved from the superscope instead. Scopes always write variables on <it>new</it>, regardless of where they are made to read from. The following snippet reads z from the superscope to assign it to the scope. The value of z remains in the superscope, and can actually be retrieved from objects themselves.</p>
+		
+<pre><code class="language-cpp">z = 1;
+point = {
+	x=z;
+	y=2;
+	new
+};
+z = 0;
+print(point.super.z); //0
+print(point.x); //1
+print(point.super.z); //1</code></pre>
+
+		<p>Previously, we called the dot operator as a type of scope access, so let us see what this is all about. In truth, a.b is the non-parentheses version of a.(b), in which b is made to run within the scope of a, but can also be a code block. That is, you may have a complicated scope modification inside the parentheses. Of course, you can always use brackets instead of parentheses to perform any kind of operations using the scope's values without. This is demonstrated in the snippet bellow.</p>
+		
+<pre><code class="language-cpp">point = {
+	x=1;
+	y=2;
+	new
+};
+point.x = 5; // the same as point.(x=5);
+print(point.x); //5
+
+point.(x=1; y=1;);
+print(point.x); //1
+print(point.y); //1
+
+derived = point.{y=6;new}; //super of derived is the point
+print(derived.x); //1
+print(derived.y); //6
+print(derived.super.x); //1</code></pre>
+		
+		<p>In the scenarios visited above, it was always clear whose scope variables were gathered;
+		each variable name could be found in only one scope and retrieved from that one. 
+		The variable scope is also clear during assignment, even if there are the same names across multiple scopes, only the variable residing on the current <it>new</it> object is set.
+		However, things get trickier when the same variables exist in multiple scopes, as in snippet bellow, where it is uncertain whether after accessing the scope a we should use its own x or parent's version of; for this reason an error is created. Recall that the accessed part is also a scope and not some simple field getter. Other programming languages do not encounter this issue, because they do not support the more dynamic scope access of.
+		</p>
+<pre><code class="language-cpp">x=1;
+a={x=0;new};
+try(print(a.x)); //this will catch the created error
+</code></pre>
+		<p>The dot operation uses the accessor scope (i.e., from which scope access is called) as the <it>failback</it> of the scope being entered (i.e., the scope of a). This is what NS calls an operation that catches conflicting concepts. However, there are two other </p>
+
+
+		
+        <section id="custom-expressions">
+          <h4>Custom expressions</h4>
+          <p>TODO</p>
+        </section>
+        
+		
+        <section id="scope-access">
+          <h4>Scope access</h4>
+          <p>TODO</p>
+        </section>
+      </section>
+      
+      <section id="control-flow">
+        <h1>Control flow</h1>
+        <p>TODO</p>
+        
+        <section id="if">
+          <h4>if</h4>
+          <p>TODO</p>
+        </section>
+        
+        <section id="while">
+          <h4>while</h4>
+          <p>TODO</p>
+        </section>
+        
+        <section id="arithmetics">
+          <h4>Arithmetics</h4>
+          <p>TODO</p>
+        </section>
+      </section>
+
+
+    </main>
+  </div>
+</div>
+
+
+
+</div>
+
+
+
+</body>
+</html>
