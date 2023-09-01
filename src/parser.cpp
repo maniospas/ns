@@ -28,36 +28,32 @@ bool is_number_convertible(std::string predicate) {
 }
 
 
-class Callable: public CustomPredicateExecutor {
-    private:
-        std::shared_ptr<Object> call_;
-    public:
-        Callable(std::string signature, std::string call): CustomPredicateExecutor(predicate_parts(tokenize(signature))), call_(parse(call)) {
-        }
-        Callable(std::string signature, std::shared_ptr<Object> call): CustomPredicateExecutor(predicate_parts(tokenize(signature))), call_(call) {
-        }
-        Callable(std::vector<std::shared_ptr<PredicatePart>> signature, std::shared_ptr<Object> call): CustomPredicateExecutor(signature), call_(call) {
-        }
-        std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope) {
-            //if(std::dynamic_pointer_cast<Scoped>(call_) != nullptr)
-            //    return scope->enter();
-            return scope->enter();
-        }
-        std::shared_ptr<Scope> descoped(std::shared_ptr<Scope> scope) {
-            if(std::dynamic_pointer_cast<Scoped>(call_) == nullptr)
-                scope->set("new", scope->get("super"));
-            return scope;
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            return call_->value(scope);
-        }
-        const std::string name() const {
-            return CustomPredicateExecutor::name()+":="+call_->name();
-        }
-        const std::string assignment_name() const {
-            return CustomPredicateExecutor::assignment_name();
-        }
-};
+
+Callable::Callable(std::string signature, std::string call): CustomPredicateExecutor(predicate_parts(tokenize(signature))), call_(parse(call)) {
+}
+Callable::Callable(std::string signature, std::shared_ptr<Object> call): CustomPredicateExecutor(predicate_parts(tokenize(signature))), call_(call) {
+}
+Callable::Callable(std::vector<std::shared_ptr<PredicatePart>> signature, std::shared_ptr<Object> call): CustomPredicateExecutor(signature), call_(call) {
+}
+std::shared_ptr<Scope> Callable::scoped(std::shared_ptr<Scope> scope) {
+    //if(std::dynamic_pointer_cast<Scoped>(call_) != nullptr)
+    //    return scope->enter();
+    return scope->enter();
+}
+std::shared_ptr<Scope> Callable::descoped(std::shared_ptr<Scope> scope) {
+    if(std::dynamic_pointer_cast<Scoped>(call_) == nullptr)
+        scope->set("new", scope->get("super"));
+    return scope;
+}
+std::shared_ptr<Object> Callable::implement(std::shared_ptr<Scope> scope) {
+    return call_->value(scope);
+}
+const std::string Callable::name() const {
+    return CustomPredicateExecutor::name()+":="+call_->name();
+}
+const std::string Callable::assignment_name() const {
+    return CustomPredicateExecutor::assignment_name();
+}
 
 void error(const std::string& message) {
     throw std::runtime_error(message+Object::get_stack_trace());

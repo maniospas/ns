@@ -75,20 +75,32 @@
             <ul class="nav flex-column ml-3">
               <li class="nav-item"><a class="nav-link smaller-font" href="#assignment-scope">Assignment scope</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#scopes-as-objects">Scopes as objects</a></li>
-              <li class="nav-item"><a class="nav-link smaller-font" href="#custom-expressions">Custom expressions</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#define-expressions">Define expressions</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#scope-access">Scope access</a></li>
             </ul>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#control-flow">
-              Control flow
+            <a class="nav-link" href="#common-expressions">
+              Common expressions
             </a>
 			<ul class="nav flex-column ml-3">
-              <li class="nav-item"><a class="nav-link smaller-font" href="#if">if</a></li>
-              <li class="nav-item"><a class="nav-link smaller-font" href="#while">while</a></li>
-              <li class="nav-item"><a class="nav-link smaller-font" href="#arithmetics">Arithmetics</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#io">I/O</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#control-flow">Control flow</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#running-files">Running files</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#errors">Errors</a></li>
             </ul>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#high-order-features">
+              High order features
+            </a>
+			<ul class="nav flex-column ml-3">
+              <li class="nav-item"><a class="nav-link smaller-font" href="#runtime-parsing">Runtime parsing</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#functional-programming">Functional programming</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#arithmetics">Metaprogramming</a></li>
+            </ul>
+          </li>
+		  
         </ul>
       </div>
     </nav>
@@ -136,7 +148,9 @@ print(x); //1</code></pre>
 print(y); //1</code></pre>
 		
         </section>
-        
+		
+		
+
         <section id="scopes-as-objects">
           <h4>Scopes as objects</h4>
           <p>Scopes can view themselves like objects that hold their assigned variables. This view is obtained with the <it>new</it> variable. Object fields can be retrieved with the dot operator. What actually happens is a little more nuanced (the dot operator is one of the available types of scope access), but this understanding suffices to get a first example going. You can naturally return <it>new</it> from the scope itself to effectively generate an object, as demonstrated in the snippet below.</p>
@@ -163,6 +177,45 @@ print(point.super.z); //0
 print(point.x); //1
 print(point.super.z); //1</code></pre>
 
+        </section>
+        
+		
+        <section id="define-expressions">
+          <h4>Define expressions</h4>
+          <p>The final NS core operation is assignment of callable formulas. These define any kind of predicate-based notation.Basically, you need to write a textual expression to be matched *including expressions with multiple predicates seperated by spaces*, and any arguments need to be enclosed parentheses. When formulas run, they do so under a scope of their argument values. For example, you can define a constructor for class objects like in the following snippet.<p> 
+
+<pre><code class="language-cpp">Point(x,y,z) := { // x, y, z automatically accessed from super
+    new
+};
+</code></pre>
+
+		<p>If formula implementations are not scoped into brackets, internal assignments are transferred to their superscope too per normal (the arguments themselves are never assigned, so they will not leak). For example set f(value):=(f=value) is equivalent to set f(value):={super.super.f=value}, where in the last expression the first superscope are the arguments and only this one's supercope is the object. In the following snippet, norm squared is a method name that includes spaces.
+
+<pre><code class="language-cpp">Point(x,y,z) := {
+    norm squared:=x*x + y*y + z*z; 
+    shrink(a) := (x=x*a;y=y*a;z=z*a;); // if you want to keep track of the last argument value within Point set a=a
+    new
+};
+A = Point(0,0,1);
+print(A.norm squared); //1
+</code></pre>
+
+
+		<p>The snippet uses tuples of variables like (x,y,z), but keep in mind that NS considers the comma as a shorthand and converts the expression to (x) (y) (z) under the hood. This maintains the convention that the last value of scopes is returned. Method definitions reside within their own scope. Polymorphism is supported by declaring new methods with different arguments as previous ones, like in the following snipper.
+
+<pre><code class="language-cpp">Point(x,y,z) := {new};
+Point(x,y) := Point(x,y,0);
+A = Point(1,1);
+print(A.norm squared); //2
+</code></pre>
+	<p>Use objects to pass keyword arguments or arguments that you don’t want to remain in the object’s scope.</p>
+
+        </section>
+        
+		
+        <section id="scope-access">
+          <h4>Scope access</h4>
+          
 		<p>Previously, we called the dot operator as a type of scope access, so let us see what this is all about. In truth, a.b is the non-parentheses version of a.(b), in which b is made to run within the scope of a, but can also be a code block. That is, you may have a complicated scope modification inside the parentheses. Of course, you can always use brackets instead of parentheses to perform any kind of operations using the scope's values without. This is demonstrated in the snippet bellow.</p>
 		
 <pre><code class="language-cpp">point = {
@@ -214,38 +267,8 @@ print(a:x); //1
 		<div class="alert alert-info" role="alert">
 		 The symbols =, :=, ., '#', ':' have the same priority and the leftmost one is applied first.
 		</div>
-
 		
-        <section id="custom-expressions">
-          <h4>Custom expressions</h4>
-          <p>The final NS core operation is assignment of callable formulas. These define any kind of predicate-based notation.Basically, you need to write a textual expression to be matched *including expressions with multiple predicates seperated by spaces*, and any arguments need to be enclosed parentheses. When formulas run, they do so under a scope of their argument values. For example, you can define a constructor for class objects like in the following snippet.<p> 
-
-<pre><code class="language-cpp">Point(x,y,z) := { // x, y, z automatically accessed from super
-    new
-};
-</code></pre>
-
-		<p>If formula implementations are not scoped into brackets, internal assignments are transferred to their superscope too per normal (the arguments themselves are never assigned, so they will not leak). For example set f(value):=(f=value) is equivalent to set f(value):={super.super.f=value}, where in the last expression the first superscope are the arguments and only this one's supercope is the object. In the following snippet, norm squared is a method name that includes spaces.
-
-<pre><code class="language-cpp">Point(x,y,z) := {
-    norm squared:=x*x + y*y + z*z; 
-    shrink(a) := (x=x*a;y=y*a;z=z*a;); // if you want to keep track of the last argument value within Point set a=a
-    new
-};
-A = Point(0,0,1);
-print(A.norm squared); //1
-</code></pre>
-
-
-		<p>The snippet uses tuples of variables like (x,y,z), but keep in mind that NS considers the comma as a shorthand and converts the expression to (x) (y) (z) under the hood. This maintains the convention that the last value of scopes is returned. Method definitions reside within their own scope. Polymorphism is supported by declaring new methods with different arguments as previous ones, like in the following snipper.
-
-<pre><code class="language-cpp">Point(x,y,z) := {new};
-Point(x,y) := Point(x,y,0);
-A = Point(1,1);
-print(A.norm squared); //2
-</code></pre>
-	<p>Use objects to pass keyword arguments or arguments that you don’t want to remain in the object’s scope.</p>
-
+		
 	<p>The following example shows how to override a formula using the fallback operation. Basically, it stores a <it>base</it> scope that will help define a new version of the inequality formula in the scope <it>stricter</it> by fallbacking on the base during implement. Fallback to `stricter` to run its version of inequality.</p>
 
 
@@ -259,35 +282,65 @@ print(A.norm squared); //2
 comp = stricter:(1)<(2); //test a comparison under the new scope
 print(comp)
 </code></pre>
-        </section>
 
 	<p>In both cases, using a fallfront (#) instead of a fallback (:) would fail; it would respectively create an infinite recursion, and apply the base inequality.</p>
-        </section>
-        
-		
-        <section id="scope-access">
-          <h4>Scope access</h4>
-          <p>TODO</p>
-        </section>
+      </section>
       </section>
       
-      <section id="control-flow">
-        <h1>Control flow</h1>
-        <p>TODO</p>
+      <section id="common-expressions">
+        <h1>Common expressions</h1>
+        <p>NS is shipped with several built-in expressions that you can use.</p>
+		
+		
+        <section id="io">
+          <h4>I/O</h4>
+          <p>Two base operations are provided for command line inputs and outputs: print and read. The first prints any kind of value, whereas the second reads a string from the console while displaying a message. Use them as in the following snippet.</p>
+
+<pre><code class="language-cpp">name = read("Please give your name: ");
+print("Hello "+name+"!");
+</code></pre>
+        </section>
         
-        <section id="if">
-          <h4>if</h4>
+        <section id="control-flow">
+          <h4>Control flow</h4>
+          <p>The control flow expressions provided are conditions and loops. Recall that assignments within bracketed scopes do not escape to parents, but conditions are also scopes to be evaluated. For example, the following snippet prints all numbers.</p>
+
+<pre><code class="language-cpp">name = read("Please give your name: ");
+print(i);
+</code></pre>
+
+        </section>
+		  
+
+        </section>
+        
+        <section id="running-files">
+          <h4>Running files</h4>
           <p>TODO</p>
         </section>
         
-        <section id="while">
-          <h4>while</h4>
-          <p>TODO</p>
-        </section>
-        
-        <section id="arithmetics">
-          <h4>Arithmetics</h4>
-          <p>TODO</p>
+        <section id="errors">
+          <h4>Errors</h4>
+          <p>Syntax and logical errors are caught with a try command; this takes a scope as an argument and ruturns either its outcome or the error. To run code that prevents side effects on non-objects, enclose error-prone code in brackets like this;
+<pre><code class="language-cpp">error = try {
+	x = 1;
+	y = x + z;//non-existing variable z
+};
+print(error);
+</code></pre> 
+		  
+		  For example, the following snippet implements NS's command line interface with error catching for each command.</p>
+<pre><code class="language-cpp">cli = 1;
+exit := (cli = 0;'NS command line terminated.');
+output = ( //keep scope modifications with parentheses
+	while(cli) (
+		line = read('> ');
+		try(run(line))
+	)
+);
+print(output);
+</code></pre>		  
+
         </section>
       </section>
 

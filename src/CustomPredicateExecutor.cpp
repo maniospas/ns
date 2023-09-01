@@ -4,6 +4,8 @@
 #include <iostream>
 #include "parser.h"
 #include "Number.h"
+#include "Scoped.h"
+#include "Unscoped.h"
 
 
 CustomPredicateExecutor::CustomPredicateExecutor(std::vector<std::shared_ptr<PredicatePart>> names): names_(names) {
@@ -18,10 +20,15 @@ CustomPredicateExecutor::~CustomPredicateExecutor() {
 static std::vector<std::shared_ptr<PredicatePart>> non_matching_parts;
 
 
-std::shared_ptr<Object> create_predicate_or_number(std::vector<std::shared_ptr<PredicatePart>>& gathered) {
+std::shared_ptr<Object> create_predicate_or_primitive(std::vector<std::shared_ptr<PredicatePart>>& gathered) {
     if(gathered.size()==1 
         && gathered[0]->object()!=nullptr 
-        && std::dynamic_pointer_cast<Number>(gathered[0]->object())!=nullptr)
+        && (
+             std::dynamic_pointer_cast<Number>(gathered[0]->object())!=nullptr
+             || std::dynamic_pointer_cast<String>(gathered[0]->object())!=nullptr
+             || std::dynamic_pointer_cast<Scoped>(gathered[0]->object())!=nullptr
+             || std::dynamic_pointer_cast<Unscoped>(gathered[0]->object())!=nullptr
+        ))
             return gathered[0]->object();
     return std::make_shared<Predicate>(gathered);
 }
@@ -47,7 +54,7 @@ std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(std::
                 gathered.push_back(names[i]);
                 i++;
             }
-            ret.push_back(std::make_shared<PredicatePartObject>(create_predicate_or_number(gathered)));
+            ret.push_back(std::make_shared<PredicatePartObject>(create_predicate_or_primitive(gathered)));
         }
         else if(names_[pos+1]->object()==nullptr) {
             std::vector<std::shared_ptr<PredicatePart>> gathered;
@@ -55,7 +62,7 @@ std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(std::
                 gathered.push_back(names[i]);
                 i++;
             }
-            ret.push_back(std::make_shared<PredicatePartObject>(create_predicate_or_number(gathered)));
+            ret.push_back(std::make_shared<PredicatePartObject>(create_predicate_or_primitive(gathered)));
         }
         else
             return non_matching_parts;
@@ -112,8 +119,21 @@ std::shared_ptr<Scope> CustomPredicateExecutor::vscoped(std::shared_ptr<Scope> s
 
 std::shared_ptr<Scope> CustomPredicateExecutor::predicateScope = std::make_shared<PredicateScope>();
 
-std::shared_ptr<Object> CustomPredicateExecutor::evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope) {
-    return exists(expression->value(scope));
+
+void CustomPredicateExecutor::evaluate_argument(
+    std::shared_ptr<Scope> derived_scope,
+    std::shared_ptr<Object> prototype, 
+    std::shared_ptr<Object> expression, 
+    std::shared_ptr<Scope> value_scope) {
+    if(std::dynamic_pointer_cast<Unscoped>(prototype)!=nullptr)
+        prototype = exists(std::dynamic_pointer_cast<Unscoped>(prototype)->contents());
+    if(std::dynamic_pointer_cast<Unscoped>(prototype)!=nullptr){
+        std::string name = exists(exists(std::dynamic_pointer_cast<Unscoped>(prototype)->contents())->value(CustomPredicateExecutor::predicateScope))->name();
+        derived_scope->set(name, expression);
+    }
+    else
+        derived_scope->set(prototype->value(CustomPredicateExecutor::predicateScope)->name(), 
+                            exists(expression->value(value_scope)));
 }
 
 std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate) {
@@ -125,7 +145,7 @@ std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> sco
         for(int i=0;i<N;i++) {
             auto expression = predicate->names_[i]->object();
             if(expression!=nullptr)
-                derived_scope->set(names_[i]->object()->value(CustomPredicateExecutor::predicateScope)->name(), evaluate_argument(expression, value_scope));
+                evaluate_argument(derived_scope, names_[i]->object(), expression, value_scope);
         }
     derived_scope = descoped(derived_scope);
     return implement(derived_scope);

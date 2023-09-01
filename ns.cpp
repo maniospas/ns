@@ -155,13 +155,10 @@ class GreaterEqExecutor: public CustomPredicateExecutor {
 
 class IfExecutor: public CustomPredicateExecutor {
     public:
-        IfExecutor(): CustomPredicateExecutor("if(condition)(success)") {
+        IfExecutor(): CustomPredicateExecutor("if((condition))((success))") {
         }
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
-        }
-        std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope){
-            return expression;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             std::shared_ptr<Object> condition = scope->get("condition");
@@ -175,13 +172,10 @@ class IfExecutor: public CustomPredicateExecutor {
 
 class IfElseExecutor: public CustomPredicateExecutor {
     public:
-        IfElseExecutor(): CustomPredicateExecutor("if(condition)(success)else(failure)") {
+        IfElseExecutor(): CustomPredicateExecutor("if((condition))((success))else((failure))") {
         }
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
-        }
-        std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope){
-            return expression;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             std::shared_ptr<Object> condition = scope->get("condition");
@@ -196,13 +190,10 @@ class IfElseExecutor: public CustomPredicateExecutor {
 
 class WhileExecutor: public CustomPredicateExecutor {
     public:
-        WhileExecutor(): CustomPredicateExecutor("while(condition)(loop)") {
+        WhileExecutor(): CustomPredicateExecutor("while((condition))((loop))") {
         }
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
-        }
-        std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope){
-            return expression;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             std::shared_ptr<Object> ret = std::shared_ptr<Object>(nullptr);
@@ -224,7 +215,7 @@ std::string readfile(std::string path) {
 
 class LoadExecutor: public CustomPredicateExecutor {
     public:
-        LoadExecutor(): CustomPredicateExecutor("run{path}") {
+        LoadExecutor(): CustomPredicateExecutor("run(path)") {
         }
         std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope) {
             return scope;
@@ -234,10 +225,14 @@ class LoadExecutor: public CustomPredicateExecutor {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             //try{
-                std::string source = exists(scope->get("path"))->name();
-                if(ends_with(source, ".ns"))
-                    source = readfile(source);
-                return exists(exists(parse(source))->value(scope));
+                std::shared_ptr<Object> obj = exists(scope->get("path"));
+                if(std::dynamic_pointer_cast<String>(obj)!=nullptr) {
+                    std::string source = obj->name();
+                    if(ends_with(source, ".ns"))
+                        source = readfile(source);
+                    obj = exists(parse(source));
+                }
+                return exists(obj->value(scope));
             /*}
             catch (std::runtime_error& e) {
                 std::cout << e.what() << std::endl;
@@ -249,13 +244,10 @@ class LoadExecutor: public CustomPredicateExecutor {
 
 class CatchExecutor: public CustomPredicateExecutor {
     public:
-        CatchExecutor(): CustomPredicateExecutor("try{source}") {
+        CatchExecutor(): CustomPredicateExecutor("try((source))") {
         }
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
-        }
-        std::shared_ptr<Object> evaluate_argument(std::shared_ptr<Object> expression, std::shared_ptr<Scope> scope){
-            return expression;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             std::list<std::shared_ptr<Object>> previous_stack(Object::stack);
