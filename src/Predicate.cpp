@@ -11,10 +11,10 @@
 
 
 Predicate::Predicate(std::vector<std::shared_ptr<PredicatePart>> names): names_(names) {
-    //std::cout << name() << "\n";
-    for(int i=0;i<names_.size();i++) 
+    for(int i=0;i<names_.size();i++)  {
         if(names_[i]==nullptr)
             error("Empty predicate part");
+    }
 }
 
 Predicate::~Predicate() {

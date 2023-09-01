@@ -3,6 +3,8 @@
 #include "String.h"
 #include <iostream>
 #include "parser.h"
+#include "Number.h"
+
 
 CustomPredicateExecutor::CustomPredicateExecutor(std::vector<std::shared_ptr<PredicatePart>> names): names_(names) {
 }
@@ -14,6 +16,15 @@ CustomPredicateExecutor::~CustomPredicateExecutor() {
 }
 
 static std::vector<std::shared_ptr<PredicatePart>> non_matching_parts;
+
+
+std::shared_ptr<Object> create_predicate_or_number(std::vector<std::shared_ptr<PredicatePart>>& gathered) {
+    if(gathered.size()==1 
+        && gathered[0]->object()!=nullptr 
+        && std::dynamic_pointer_cast<Number>(gathered[0]->object())!=nullptr)
+            return gathered[0]->object();
+    return std::make_shared<Predicate>(gathered);
+}
 
 std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(std::vector<std::shared_ptr<PredicatePart>> names) {
     std::vector<std::shared_ptr<PredicatePart>> ret;
@@ -36,7 +47,7 @@ std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(std::
                 gathered.push_back(names[i]);
                 i++;
             }
-            ret.push_back(std::make_shared<PredicatePartObject>(std::make_shared<Predicate>(gathered)));
+            ret.push_back(std::make_shared<PredicatePartObject>(create_predicate_or_number(gathered)));
         }
         else if(names_[pos+1]->object()==nullptr) {
             std::vector<std::shared_ptr<PredicatePart>> gathered;
@@ -44,7 +55,7 @@ std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(std::
                 gathered.push_back(names[i]);
                 i++;
             }
-            ret.push_back(std::make_shared<PredicatePartObject>(std::make_shared<Predicate>(gathered)));
+            ret.push_back(std::make_shared<PredicatePartObject>(create_predicate_or_number(gathered)));
         }
         else
             return non_matching_parts;
@@ -113,9 +124,8 @@ std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> sco
     if(predicate!=nullptr && names_.size()==predicate->names_.size())
         for(int i=0;i<N;i++) {
             auto expression = predicate->names_[i]->object();
-            if(expression!=nullptr){
+            if(expression!=nullptr)
                 derived_scope->set(names_[i]->object()->value(CustomPredicateExecutor::predicateScope)->name(), evaluate_argument(expression, value_scope));
-            }
         }
     derived_scope = descoped(derived_scope);
     return implement(derived_scope);

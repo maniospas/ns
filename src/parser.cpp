@@ -302,7 +302,6 @@ std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::str
             //predicateParts.push_back(std::make_shared<PredicatePartWord>(token));
         }
         else if(depth==0) {
-            // TODO: both with and without this, we get errors
             if(is_number_convertible(token))
                 predicateParts.push_back(std::make_shared<PredicatePartObject>(std::make_shared<Number>(std::stof(token))));
             else
