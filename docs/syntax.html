@@ -303,10 +303,13 @@ print("Hello "+name+"!");
         
         <section id="control-flow">
           <h4>Control flow</h4>
-          <p>The control flow expressions provided are conditions and loops. Recall that assignments within bracketed scopes do not escape to parents, but conditions are also scopes to be evaluated. For example, the following snippet prints all numbers.</p>
+          <p>NS provides conditions and loops. Recall that assignments within bracketed scopes do not escape to parents, but conditions are also scopes to be evaluated. For example, the following snippet prints the squares of all integers less than 10 without exposing any internally generated variables; the loop's condition is responsible for iterating through the integeres by changing the superscope's iterated variable, and the body performs safe assignments.</p>
 
-<pre><code class="language-cpp">name = read("Please give your name: ");
-print(i);
+<pre><code class="language-cpp">i=-1;
+while(i=i+1;i<10) {
+	i squared = i*i;
+	print(i squared);
+}
 </code></pre>
 
         </section>
@@ -343,6 +346,84 @@ print(output);
 
         </section>
       </section>
+	  
+	  
+	  
+	  
+      
+      <section id="high-order-features">
+        <h1>High Order Features</h1>
+        <p>NS lets you extend how it behaves.</p>
+		
+        <section id="runtime-parsing">
+          <h4>Runtime parsing</h4>
+          <p>Before looking at more complex features, you need to understand how NS performs internal computations;
+		  source code in textual form is tokenized (e.g., 'while(i<10)' is split to tokens 'while' '(' 'i' '<' '10')) and parsed into an abstract syntax tree of <b>only core features</b>. This is analogous to a compilation process, with the difference that it does not provide bytecode but an internal representation. To account for expressions, which can be dynamically defined and depend on the scope, unparsed expressions are retained as they are.</p>
+		  
+		  <p>Scope definitions using parentheses or brackets of the unparsable expressions may have been correctly parsed and reside alongside the yet-uncomplied tokens. Tokenization is finalized and does not need to rerun, but it is yet unclear how the expression should be interpreted, as it may comprise nested expressions. For example, 1+2*3 can not be immediately parsed, because the meaning of * and + needs to be extracted from the scope running the expression in the end.
+		  </p>
+		  
+		  <p>Unparsed expression are parsed at the first point where their values is retrieved, and to make complex code run fastly the outcome of parsing is retained for future use.</p>
+        </section>
+		
+		
+        <section id="functional-programming">
+			<h4>Functional programming</h4>
+			<p>In addition to object immutability, which is a choice that a programmer can adhere to, functional programming also requires the ability to pass methods as arguments to other methods. NS does not have the concept of a method; only the more general idea of expressions. However, these are not identifiable from one keyword. There are two ways with which NS works around this restriction. </p>
+			
+			<p>The first option is ideal when creating expressions; just add another set of parentheses around arguments that are expected to be unevaluated scopes. Unevaluated scopes can then be run with the namesake method (running is polymorphised so that it runs code or files for string inputs, but evaluates expressions otherwise). This is demonstrated in the following snippet, which first creates two unevaluated scopes and then runs them within the sequence expression.</p>
+			
+			<pre><code class="language-cpp">sequence((first))((second)) := (
+	print("first");
+	run(first);
+	print("second");
+	run(second)
+);
+
+sequence(x=1;print(" ...done"), x=2;print(" ...done")); //don't forget that , is parsed as )(
+</code></pre>	
+
+
+		<p>Using the above, we can define a lambda scope, which is an unevaluated scope to be evaluated later. The lambda expression needs to either be declared by you, as in the following example snippet, or loaded from a library, such as utils.</p>
+		
+		<pre><code class="language-cpp">lambda((code)) := {core}; //just return the unevaluated scope given as input
+condition tight = lambda(x<10); // does not run immediately
+condition loose = lambda(x<100); // does not run immediately
+magnitude(x, condition) := {
+	if(run(condition)) {  // or if(condition) as the latter already evaluates conditions
+		print("small");
+	}
+	else {
+		print("large");
+	}
+};
+magnitude(20, condition tight);
+magnitude(20, condition loose);
+</code></pre>
+
+		
+		<p>When you do not need to define expressions with unevaluted snippets as inputs, creating an object with a specifically defined expression pattern can be more straightforward for functional programming. This is shown in the following snippet, where you just need to select the same call definition for your interchangable functional components; in fact, you should use names other than call to give an in-built typing constraint to what type of task you are computing.</p>
+		
+		<pre><code class="language-cpp">condition tight = {call(x):={x<10};new};
+condition loose = {call(x):={x<100};new};
+magnitude(x, condition) := {
+	if(condition: call x) {  // or if(condition) as the latter already evaluates conditions
+		print("small");
+	}
+	else {
+		print("large");
+	};
+};
+magnitude(x,condition) := {print(condition);if(condition: call x) {print("small");}else{print("large");};};
+magnitude(20, condition tight);  // small
+magnitude(20, condition loose);  // large
+</code></pre>
+			
+			
+		</section>
+		
+		
+		</section>
 
 
     </main>
