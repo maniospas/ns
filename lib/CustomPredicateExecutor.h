@@ -13,6 +13,8 @@ class CustomPredicateExecutor: public Object {
     private:
         std::vector<std::shared_ptr<PredicatePart>> names_;
     public:
+        int priority = 0;
+        std::vector<std::shared_ptr<PredicatePart>> match(std::vector<std::shared_ptr<PredicatePart>> names);
         CustomPredicateExecutor(std::vector<std::shared_ptr<PredicatePart>> names);
         CustomPredicateExecutor(const std::string& text);
         virtual ~CustomPredicateExecutor();

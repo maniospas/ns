@@ -9,7 +9,7 @@
 
 class Predicate: public Object {
     public:
-        const std::vector<std::shared_ptr<PredicatePart>> names_;
+        std::vector<std::shared_ptr<PredicatePart>> names_;
         Predicate(std::vector<std::shared_ptr<PredicatePart>> names);
         virtual ~Predicate();
         const std::string name() const;

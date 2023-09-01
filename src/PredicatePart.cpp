@@ -1,4 +1,6 @@
 #include "PredicatePart.h"
+#include "parser.h"
+
 
 PredicatePart::PredicatePart() {
 }

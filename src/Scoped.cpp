@@ -8,6 +8,8 @@ Scoped::~Scoped() {
 }
 
 const std::string Scoped::name() const {
+    if(object_==nullptr)
+        return "{}";
     return "{"+object_->name()+"}";
 }
 

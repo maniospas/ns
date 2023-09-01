@@ -25,6 +25,7 @@ class Scope: public Object {
         std::shared_ptr<Scope> enter();
         int size() const;
         const std::string name() const;
+        void gather_executors(std::map<std::string, std::shared_ptr<CustomPredicateExecutor>>& executors);
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
         void load(std::shared_ptr<CustomPredicateExecutor> method);
 };

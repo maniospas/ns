@@ -13,5 +13,6 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
 std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::string> tokens);
 std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::string>& tokens, int from, int to);
 std::shared_ptr<Object> parse(const std::string& source);
+bool is_number_convertible(std::string predicate);
 
 #endif

@@ -13,6 +13,47 @@ CustomPredicateExecutor::CustomPredicateExecutor(const std::string& text): names
 CustomPredicateExecutor::~CustomPredicateExecutor() {
 }
 
+static std::vector<std::shared_ptr<PredicatePart>> non_matching_parts;
+
+std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(std::vector<std::shared_ptr<PredicatePart>> names) {
+    std::vector<std::shared_ptr<PredicatePart>> ret;
+    int i = 0;
+    //std::cout<<"checking "<<name()<<"\n";
+    for(int pos=0;pos<names_.size();pos++) {
+        if(i>=names.size())
+            return non_matching_parts;
+        if(names_[pos]->object()==nullptr) {
+            if(names[i]->name()==names_[pos]->name()) {
+                ret.push_back(names[i]);
+                i++;
+            }
+            else 
+                return non_matching_parts;
+        }
+        else if(pos==names_.size()-1) {
+            std::vector<std::shared_ptr<PredicatePart>> gathered;
+            while(i<names.size()) {
+                gathered.push_back(names[i]);
+                i++;
+            }
+            ret.push_back(std::make_shared<PredicatePartObject>(std::make_shared<Predicate>(gathered)));
+        }
+        else if(names_[pos+1]->object()==nullptr) {
+            std::vector<std::shared_ptr<PredicatePart>> gathered;
+            while(i<names.size() && names_[pos+1]->name()!=names[i]->name()) {
+                gathered.push_back(names[i]);
+                i++;
+            }
+            ret.push_back(std::make_shared<PredicatePartObject>(std::make_shared<Predicate>(gathered)));
+        }
+        else
+            return non_matching_parts;
+    }
+    if(i<names.size()-1)
+        return non_matching_parts;
+    return ret;
+}
+
 const std::string CustomPredicateExecutor::name() const {
     std::string name = "";
     for(int i=0;i<names_.size();i++) {

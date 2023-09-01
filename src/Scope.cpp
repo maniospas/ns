@@ -24,12 +24,30 @@ Scope::Scope(const std::shared_ptr<Object> parent,
 Scope::~Scope() {
 }
 
+void Scope::gather_executors(std::map<std::string, std::shared_ptr<CustomPredicateExecutor>>& executors) {
+    if(values["fallfront"]!=nullptr)
+        std::dynamic_pointer_cast<Scope>(values["fallfront"])->gather_executors(executors);
+    std::shared_ptr<CustomPredicateExecutor> casted;
+    for(auto it=values.begin();it!=values.end();++it) 
+        if(it->second!=nullptr 
+        && (casted=std::dynamic_pointer_cast<CustomPredicateExecutor>(it->second))!=nullptr
+        && executors.find(it->first)==executors.end())
+            executors[it->first] = casted;
+
+    if(values["super"]!=nullptr)
+        std::dynamic_pointer_cast<Scope>(values["super"])->gather_executors(executors);
+    if(values["fallback"]!=nullptr)
+        std::dynamic_pointer_cast<Scope>(values["fallback"])->gather_executors(executors);
+    if(values["failback"]!=nullptr)
+        std::dynamic_pointer_cast<Scope>(values["failback"])->gather_executors(executors);
+}
+
 void Scope::set(const std::string& name, const std::shared_ptr<Object> value) {
     if(name!="new" && values["new"]!=nullptr)
         values["new"]->set(name, value);
     else if(value==nullptr)
         values.erase(name);
-    else
+    else 
         values[name] = value;
 }
 
@@ -54,6 +72,8 @@ std::shared_ptr<Object> Scope::get(const std::string& name) {
         if(ret!=nullptr) 
             return ret;
     }
+    if(name=="super" && values["super"]==values["new"] && values["super"]!=nullptr) 
+        return values["super"]->get("super");
     auto it = values.find(name);
     if(it==values.end()) {
         std::shared_ptr<Object> ret;
@@ -61,7 +81,7 @@ std::shared_ptr<Object> Scope::get(const std::string& name) {
         if(new_!=values.end() && new_->second!=nullptr && (ret=new_->second->get(name))!=nullptr)
             return ret;*/
         auto parent_ = values.find("super");
-        if(parent_!=values.end() && parent_->second!=nullptr && (ret=parent_->second->get(name))!=nullptr)
+        if(parent_!=values.end() && parent_->second!=nullptr && (ret=parent_->second->get(name))!=nullptr) 
             return overlap(name, ret);
         auto fallback_ = values.find("fallback");
         if(fallback_!=values.end() && fallback_->second!=nullptr && (ret=fallback_->second->get(name))!=nullptr)
@@ -78,6 +98,8 @@ std::shared_ptr<Scope> Scope::enter() {
 const std::string Scope::name() const {
     std::string desc = "{";
     for(auto it=values.begin(); it!=values.end();++it) {
+        //if(it->first=="super" && it->second!=nullptr && (it->second.get())==values["new"].get()) 
+        //    continue;
       /*if(it->first=="new") {
         if(it->second!=nullptr)
             desc += "("+it->second->name().substr(1, -1)+");";

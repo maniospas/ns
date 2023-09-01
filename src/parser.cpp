@@ -59,7 +59,6 @@ class Callable: public CustomPredicateExecutor {
         }
 };
 
-
 void error(const std::string& message) {
     throw std::runtime_error(message+Object::get_stack_trace());
 }
@@ -267,7 +266,8 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
             return std::make_shared<Number>(std::stof(tokens[from]));
         //return std::make_shared<Variable>(tokens[from]);
     }
-    return std::make_shared<Predicate>(predicate_parts(tokens, from, to));
+    auto parts = predicate_parts(tokens, from, to);
+    return std::make_shared<Predicate>(parts);
 }
 
 std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::string> tokens) {
@@ -301,8 +301,13 @@ std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::str
             }
             //predicateParts.push_back(std::make_shared<PredicatePartWord>(token));
         }
-        else if(depth==0)
-            predicateParts.push_back(std::make_shared<PredicatePartWord>(token));
+        else if(depth==0) {
+            // TODO: both with and without this, we get errors
+            if(is_number_convertible(token))
+                predicateParts.push_back(std::make_shared<PredicatePartObject>(std::make_shared<Number>(std::stof(token))));
+            else
+                predicateParts.push_back(std::make_shared<PredicatePartWord>(token));
+        }
     }
     if(block_start!=-1 || depth>0)
         error("Imbalanced parentheses or brackets.");

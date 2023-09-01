@@ -8,6 +8,8 @@ Unscoped::~Unscoped() {
 }
 
 const std::string Unscoped::name() const {
+    if(object_==nullptr)
+        return "()";
     return "("+object_->name()+")";
 }
 

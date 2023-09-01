@@ -61,6 +61,7 @@ class DetachExecutor: public CustomPredicateExecutor {
 class AddExecutor: public CustomPredicateExecutor {
     public:
         AddExecutor(): CustomPredicateExecutor("(a)+(b)") {
+            priority = 1;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
@@ -72,6 +73,7 @@ class AddExecutor: public CustomPredicateExecutor {
 class SubExecutor: public CustomPredicateExecutor {
     public:
         SubExecutor(): CustomPredicateExecutor("(a)-(b)") {
+            priority = 2;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
@@ -83,11 +85,26 @@ class SubExecutor: public CustomPredicateExecutor {
 class MulExecutor: public CustomPredicateExecutor {
     public:
         MulExecutor(): CustomPredicateExecutor("(a)*(b)") {
+            priority = 3;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
             float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
             return std::make_shared<Number>(a*b);
+        }
+};
+
+class DivExecutor: public CustomPredicateExecutor {
+    public:
+        DivExecutor(): CustomPredicateExecutor("(a)/(b)") {
+            priority = 4;
+        }
+        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            if(b==0)
+                error("Division by zero");
+            return std::make_shared<Number>(a/b);
         }
 };
 
@@ -216,16 +233,16 @@ class LoadExecutor: public CustomPredicateExecutor {
             return scope;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            try{
+            //try{
                 std::string source = exists(scope->get("path"))->name();
                 if(ends_with(source, ".ns"))
                     source = readfile(source);
                 return exists(exists(parse(source))->value(scope));
-            }
+            /*}
             catch (std::runtime_error& e) {
                 std::cout << e.what() << std::endl;
                 return std::make_shared<String>(e.what());
-            }
+            }*/
         }
 };
 
@@ -270,6 +287,7 @@ int main(int argc, char *argv[]) {
     global->load(std::make_shared<AddExecutor>());
     global->load(std::make_shared<MulExecutor>());
     global->load(std::make_shared<SubExecutor>());
+    global->load(std::make_shared<DivExecutor>());
     global->load(std::make_shared<IfExecutor>());
     global->load(std::make_shared<IfElseExecutor>());
     global->load(std::make_shared<WhileExecutor>());
