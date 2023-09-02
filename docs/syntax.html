@@ -96,8 +96,8 @@
             </a>
 			<ul class="nav flex-column ml-3">
               <li class="nav-item"><a class="nav-link smaller-font" href="#runtime-parsing">Runtime parsing</a></li>
-              <li class="nav-item"><a class="nav-link smaller-font" href="#functional-programming">Functional programming</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#arithmetics">Metaprogramming</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#functional-programming">Functional programming</a></li>
             </ul>
           </li>
 		  
@@ -116,15 +116,11 @@
       
       <section id="language-core">
         <h1>Language core</h1>
-        <p>NS emphasizes the concept of treating scopes, blocks of code, and objects interchangeably.
-		This creates an interface that is easy to learn but provides many powerful options on designing
-		code, including the ability of programs to alter their own source code. 
+        <p>NS is designed with the idea of treating scopes, code blocks, and objects interchangeably, providing a user-friendly interface with powerful code design options. It even allows programs to modify their own source code.
 		</p>
         <section id="assignment-scope">
           <h4>Assignment scope</h4>
-		  <p>NS refers to <it>scopes</it> as blocks of code with clearly understood rule of which variables or formulas/programming commands they can access. We we talk about formulas later, and now focus on setting and accessing variables.
-		  </p>
-		  <p>Starting from a top-level scope, new ones can be declared inside it and separated by a semicolon. Scopes can be enclosed inside brackets or parentheses. Parentheses can also be ommited when running a single formula, such as assignment or printing. Of the two types, <it>bracketed scopes do not modify external variables</it> unless they explicitly access them via objects (more on this later). The following snippet demonstrates bracket and parentehesis scopes in action.
+		  <p>In NS, scopes are like blocks of code with clearly defined rules regarding which variables or programming commands they can access. Let's focus on setting and accessing variables for now. Starting from a top-level scope, you can declare new scopes inside it, separated by semicolons. Scopes can be enclosed within brackets or parentheses. Parentheses can be omitted when running a single formula, such as assignment or printing. Bracketed scopes do not modify external variables unless they explicitly access them via objects. Here's an example:
 		  </p>
 
 <pre><code class="language-cpp">x = 0;
@@ -139,7 +135,7 @@ print(x); //1
 );
 print(x); //1</code></pre>
         
-		<p>The last expression of scopes does not need to be followed by a semicolon and is actually a returned value. For example, you can have a large bracketed scope that only outputs a value at the end. In general, prefer using bracketed scopes for safe assignments, but parentheses scopes have lesser overhead. The following snippet demonstrates assignment of values from scopes.</p>
+		<p>The last expression of scopes doesn't require a semicolon and serves as a returned value. Prefer bracketed scopes for safe assignments, but parentheses scopes have lower execution time overhead.</p>
 		
 <pre><code class="language-cpp">y = {
 	x = 1;
@@ -153,7 +149,7 @@ print(y); //1</code></pre>
 
         <section id="scopes-as-objects">
           <h4>Scopes as objects</h4>
-          <p>Scopes can view themselves like objects that hold their assigned variables. This view is obtained with the <it>new</it> variable. Object fields can be retrieved with the dot operator. What actually happens is a little more nuanced (the dot operator is one of the available types of scope access), but this understanding suffices to get a first example going. You can naturally return <it>new</it> from the scope itself to effectively generate an object, as demonstrated in the snippet below.</p>
+          <p>In NS, scopes can be treated like objects that hold their assigned variables. You can access object fields using the dot operator. This view is retrieved from the `new` variable. For example:</p>
 <pre><code class="language-cpp">point = {
 	x = 1;
 	y = 2;
@@ -162,9 +158,7 @@ print(y); //1</code></pre>
 print(point.x); //1
 print(point.y); //1</code></pre>
 		
-		<p>All scopes have some additional variables (<it>super,fallback,failback,fallfront</it>) that are internally consulted for retrieval of variable values. First let as look at <it>super</it>; this is the superscope, that is scope in which <it>new</it> was originally constructed. This is the same as <it>new</it> for parentheses scopes, but is otherwise one level of hierarchy higher in a scope dependency hiererarchy.</p>
-		
-		<p>When trying to read a variable and this does not exist in the scope, this is retrieved from the superscope instead. Scopes always write variables on <it>new</it>, regardless of where they are made to read from. The following snippet reads z from the superscope to assign it to the scope. The value of z remains in the superscope, and can actually be retrieved from objects themselves.</p>
+		<p>All scopes have additional variables (super, fallback, failback, fallfront) for variable retrieval. Super refers to the superscope, which is one level higher in the scope hierarchy. When a variable is not found in a scope, it's retrieved from the superscope. Scopes always write variables on `new`. For example:</p>
 		
 <pre><code class="language-cpp">z = 1;
 point = {
@@ -182,14 +176,18 @@ print(point.super.z); //1</code></pre>
 		
         <section id="define-expressions">
           <h4>Define expressions</h4>
-          <p>The final NS core operation is assignment of callable formulas. These define any kind of predicate-based notation.Basically, you need to write a textual expression to be matched *including expressions with multiple predicates seperated by spaces*, and any arguments need to be enclosed parentheses. When formulas run, they do so under a scope of their argument values. For example, you can define a constructor for class objects like in the following snippet.<p> 
+          <p>NS allows the assignment of expressions, that is, callable formulas. These define various predicate-based notations that include spaces and can have any number of positional arguments. Arguments are enclosed in parentheses, and the comma is treated as a shorthand for `()`. For instance, you can define a constructor for class objects like this:<p> 
 
 <pre><code class="language-cpp">Point(x,y,z) := { // x, y, z automatically accessed from super
     new
 };
+point = Point(1,2,3);
+print(point.x); //1
+print(point.y); //2
+print(point.z); //3
 </code></pre>
 
-		<p>If formula implementations are not scoped into brackets, internal assignments are transferred to their superscope too per normal (the arguments themselves are never assigned, so they will not leak). For example set f(value):=(f=value) is equivalent to set f(value):={super.super.f=value}, where in the last expression the first superscope are the arguments and only this one's supercope is the object. In the following snippet, norm squared is a method name that includes spaces.
+		<p>Formula implementations can be scoped in brackets, and internal assignments are transferred to their superscope. For example:
 
 <pre><code class="language-cpp">Point(x,y,z) := {
     norm squared:=x*x + y*y + z*z; 
@@ -201,7 +199,7 @@ print(A.norm squared); //1
 </code></pre>
 
 
-		<p>The snippet uses tuples of variables like (x,y,z), but keep in mind that NS considers the comma as a shorthand and converts the expression to (x) (y) (z) under the hood. This maintains the convention that the last value of scopes is returned. Method definitions reside within their own scope. Polymorphism is supported by declaring new methods with different arguments as previous ones, like in the following snipper.
+		<p>Polymorphism of method-like expressions is automatically supported by declaring new methods with different numbers of arguments. For example:</p>
 
 <pre><code class="language-cpp">Point(x,y,z) := {new};
 Point(x,y) := Point(x,y,0);
@@ -216,7 +214,7 @@ print(A.norm squared); //2
         <section id="scope-access">
           <h4>Scope access</h4>
           
-		<p>Previously, we called the dot operator as a type of scope access, so let us see what this is all about. In truth, a.b is the non-parentheses version of a.(b), in which b is made to run within the scope of a, but can also be a code block. That is, you may have a complicated scope modification inside the parentheses. Of course, you can always use brackets instead of parentheses to perform any kind of operations using the scope's values without. This is demonstrated in the snippet bellow.</p>
+		<p>Scope access in NS is a fundamental concept that allows you to interact with and manipulate scopes and their variables. NS provides several methods for accessing and modifying scopes, which can be powerful but also require a good understanding of the language's rules. The dot operator (.) is one way to access and modify variables within a scope. When you use a.b, it implies that you want to run the scope b within the scope represented by a. Here's an example of using the dot operator:</p>
 		
 <pre><code class="language-cpp">point = {
 	x=1;
@@ -235,11 +233,8 @@ print(derived.x); //1
 print(derived.y); //6
 print(derived.super.x); //1</code></pre>
 		
-		<p>In the scenarios visited above, it was always clear whose scope variables were gathered;
-		each variable name could be found in only one scope and retrieved from that one. 
-		The variable scope is also clear during assignment, even if there are the same names across multiple scopes, only the variable residing on the current <it>new</it> object is set.
-		However, things get trickier when the same variables exist in multiple scopes, as in snippet bellow, where it is uncertain whether after accessing the scope a we should use its own x or parent's version of; for this reason an error is created. Recall that the accessed part is also a scope and not some simple field getter. Other programming languages do not encounter this issue, because they do not support the more dynamic scope access of.
-		</p>
+		<p>In the above scenarios, it is clear whose scope variables are used. It is also clear where they are written.  When there are conflicts, NS provides accessors that let you to specify how scope access affects variable retrieval. In addition to the dot operator, which creates an error in conflicts. Fallback (:) is the best accessor. It allows the accessor scope to affect the scope being entered. It means that when you access a variable, the accessor scope can influence which variable is retrieved. Here is an example:</p>
+		
 <pre><code class="language-cpp">x = 1;
 a = {
 	x = 0;
@@ -248,7 +243,7 @@ a = {
 try(print(a.x)); //this will catch the created error
 </code></pre>
 
-		<p>The dot operation uses the accessor scope (i.e., from which scope access is called) as the <it>failback</it> of the scope being entered (i.e., the scope of a). This is what NS calls an operation that catches conflicting concepts. There are two other alternatives, the <it>fallback</it> and <it>fallfront</it> accessors. The former is denoted with a colon (:) and does not let the accessor scope affect the one being entered. The latter is denoted with a sharp (#) and forces all variables to be retrieved from the accessor scope or its superscopes. If you want to treat scopes as simple objects from which to read or write, use the fallback when reading and the fallfront when writting, as in the following snippet.</p>
+		<p>Failback (#) is the best for assignment. This forces all variables to be retrieved from the accessor scope or its superscopes. It doesn't let the accessor scope affect the one being entered. It's used when you want to treat scopes as simple objects from which to read or write. Here is an example:</p>
 		
 <pre><code class="language-cpp">x = 1;
 a = {
@@ -261,16 +256,15 @@ print(a:x); //1
 </code></pre>
 
 		<div class="alert alert-info" role="alert">
-		 Having three types of accessors complicates object field operations, but clarifies which scope decides how expressions are evaluated.
+			Accessors clarify which scope decides how expressions are evaluated.
 		</div>
 		
 		<div class="alert alert-info" role="alert">
-		 The symbols =, :=, ., '#', ':' have the same priority and the leftmost one is applied first.
+			The symbols =, :=, ., #, : have the same priority and the leftmost one is applied first.
 		</div>
 		
 		
-	<p>The following example shows how to override a formula using the fallback operation. Basically, it stores a <it>base</it> scope that will help define a new version of the inequality formula in the scope <it>stricter</it> by fallbacking on the base during implement. Fallback to `stricter` to run its version of inequality.</p>
-
+	<p>As a more complicated example shows how to override a formula using the fallback operation;, it stores a <it>base</it> scope that helps define a new version of the inequality formula in the scope <it>stricter</it> by fallbacking to the base during its implementation.</p>
 
 <pre><code class="language-cpp">base=new;stricter = {
     pop(super); //remove
@@ -283,7 +277,6 @@ comp = stricter:(1)<(2); //test a comparison under the new scope
 print(comp)
 </code></pre>
 
-	<p>In both cases, using a fallfront (#) instead of a fallback (:) would fail; it would respectively create an infinite recursion, and apply the base inequality.</p>
       </section>
       </section>
       
@@ -353,7 +346,7 @@ print(output);
       
       <section id="high-order-features">
         <h1>High Order Features</h1>
-        <p>NS lets you extend how it behaves.</p>
+        <p>NS offers advanced features like runtime parsing and metaprogramming. Runtime parsing involves tokenizing and parsing source code into an abstract syntax tree. Metaprogramming allows you to work with unevaluated scopes and define lambda expressions.</p>
 		
         <section id="runtime-parsing">
           <h4>Runtime parsing</h4>
@@ -367,11 +360,9 @@ print(output);
         </section>
 		
 		
-        <section id="functional-programming">
-			<h4>Functional programming</h4>
-			<p>In addition to object immutability, which is a choice that a programmer can adhere to, functional programming also requires the ability to pass methods as arguments to other methods. NS does not have the concept of a method; only the more general idea of expressions. However, these are not identifiable from one keyword. There are two ways with which NS works around this restriction. </p>
-			
-			<p>The first option is ideal when creating expressions; just add another set of parentheses around arguments that are expected to be unevaluated scopes. Unevaluated scopes can then be run with the namesake method (running is polymorphised so that it runs code or files for string inputs, but evaluates expressions otherwise). This is demonstrated in the following snippet, which first creates two unevaluated scopes and then runs them within the sequence expression.</p>
+        <section id="metaprogramming">
+			<h4>Metaprogramming</h4>
+			<p>Metaprogramming refers to the ability of a program to manipulate and generate code dynamically. In NS, metaprogramming is achieved by passing unevaluated scopes as expression arguments. Unevaluated scopes are essentially blocks of code that are not executed immediately, but can be evaluated later when needed. You can think of them as code templates. Declare that an expression argument should remain unevaluated by using double parenthesis. To execute an unevaluated scope pass it as an agrument to the run function. Here is an example:</p>
 			
 			<pre><code class="language-cpp">sequence((first))((second)) := (
 	print("first");
@@ -384,7 +375,7 @@ sequence(x=1;print(" ...done"), x=2;print(" ...done")); //don't forget that , is
 </code></pre>	
 
 
-		<p>Using the above, we can define a lambda scope, which is an unevaluated scope to be evaluated later. The lambda expression needs to either be declared by you, as in the following example snippet, or loaded from a library, such as utils.</p>
+		<p>Unevaluated scopes can be returned with lambda expressions, which you can define like in the following example:</p>
 		
 		<pre><code class="language-cpp">lambda((code)) := {core}; //just return the unevaluated scope given as input
 condition tight = lambda(x<10); // does not run immediately
@@ -401,13 +392,16 @@ magnitude(20, condition tight);
 magnitude(20, condition loose);
 </code></pre>
 
+
 		
-		<p>When you do not need to define expressions with unevaluted snippets as inputs, creating an object with a specifically defined expression pattern can be more straightforward for functional programming. This is shown in the following snippet, where you just need to select the same call definition for your interchangable functional components; in fact, you should use names other than call to give an in-built typing constraint to what type of task you are computing.</p>
+        <section id="functional-programming">
+			<h4>Functional programming</h4>
+		<p>Functional programming is a programming paradigm that treats computation as the evaluation of mathematical functions and avoids changing state and mutable data. While NS doesn't have traditional functions in the way some other languages do, it supports functional programming principles through expressions and scope manipulation.</p>
 		
 		<pre><code class="language-cpp">condition tight = {call(x):={x<10};new};
 condition loose = {call(x):={x<100};new};
-magnitude(x, condition) := {
-	if(condition: call x) {  // or if(condition) as the latter already evaluates conditions
+magnitude(value, condition) := {
+	if(condition:call value) {  // parenthesis automatically detected, failback(:) avoids passing any x from magnitude in the condition's evaluation 
 		print("small");
 	}
 	else {
