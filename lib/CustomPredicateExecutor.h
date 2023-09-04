@@ -14,7 +14,9 @@ class CustomPredicateExecutor: public Object {
         std::vector<std::shared_ptr<PredicatePart>> names_;
     public:
         int priority = 0;
-        std::vector<std::shared_ptr<PredicatePart>> match(std::vector<std::shared_ptr<PredicatePart>> names);
+        std::vector<std::shared_ptr<PredicatePart>> match(
+            std::vector<std::shared_ptr<PredicatePart>>& names,
+            int& first_predicate_position);
         CustomPredicateExecutor(std::vector<std::shared_ptr<PredicatePart>> names);
         CustomPredicateExecutor(const std::string& text);
         virtual ~CustomPredicateExecutor();

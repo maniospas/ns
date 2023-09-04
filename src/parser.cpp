@@ -104,17 +104,17 @@ std::vector<std::string> tokenize(const std::string& source) {
             last_parenthesis = '{';
             last_parenthesis_close = '}';
         }
-        if(c=='['){
+        /*if(c=='['){
             last_parenthesis = '[';
             last_parenthesis_close = ']';
-        }
+        }*/
     }
     if(pending.length())
         tokens.push_back(pending);
     std::vector<std::string> merged_tokens;
     int i = 0;
     int N = tokens.size();
-    while(true) {
+    while(i<N) {
         std::string token = tokens[i];
         if(i==N-1) {
             merged_tokens.push_back(token);
@@ -210,9 +210,9 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
     int depth = 0;
     for(int i=from;i<=to;i++) {
         std::string c = tokens[i];
-        if(c=="{" || c=="(" || c=="[")
+        if(c=="{" || c=="(")// || c=="[")
            depth += 1;
-        if(c=="}" || c==")" || c=="]")
+        if(c=="}" || c==")")// || c=="]")
             depth -= 1;
         if(!depth && c==";") {
             auto first = parse(tokens, from, i-1);
@@ -229,9 +229,9 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
     int pos_access = -1;
     for(int i=from;i<=to;i++) {
         std::string c = tokens[i];
-        if(c=="{" || c=="(" || c=="[")
+        if(c=="{" || c=="(")// || c=="[")
            depth += 1;
-        if(c=="}" || c==")" || c=="]")
+        if(c=="}" || c==")")// || c=="]")
             depth -= 1;
         if(depth)
             continue;
@@ -272,24 +272,25 @@ std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::str
 
 std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::string>& tokens, int from, int to) {
     // trim
-    while(tokens[from]==" " && from<to)
+    while(from<to && tokens[from]==" ")
         from += 1;
-    while(tokens[to]==" " && to>from)
+    while(to>from && tokens[to]==" ")
         to -= 1;
     std::vector<std::shared_ptr<PredicatePart>> predicateParts;
     int depth = 0;
     int block_start = -1;
     for(int i=from;i<=to;i++) {
         if(tokens[i]==" " || tokens[i]=="")
-            continue;
+            continue; 
         std::string token = tokens[i];
-        if(token=="(" || token=="{" || token=="[") {
+        //std::cout << token << "\n";
+        if(token=="(" || token=="{"){// || token=="[") {
             depth += 1;
             //predicateParts.push_back(std::make_shared<PredicatePartWord>(token));
             if(depth==1)
                 block_start = i;
         }
-        else if(token==")" || token=="}" || token=="]") {
+        else if(token==")" || token=="}"){// || token=="]") {
             depth -= 1;
             if(depth==0) {
                 predicateParts.push_back(std::make_shared<PredicatePartObject>(parse(tokens, block_start, i)));  // include edges to differentiate between types of blocks

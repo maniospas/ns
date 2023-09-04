@@ -61,7 +61,7 @@ class DetachExecutor: public CustomPredicateExecutor {
 class AddExecutor: public CustomPredicateExecutor {
     public:
         AddExecutor(): CustomPredicateExecutor("(a)+(b)") {
-            priority = 1;
+            priority = 4;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
@@ -73,7 +73,7 @@ class AddExecutor: public CustomPredicateExecutor {
 class SubExecutor: public CustomPredicateExecutor {
     public:
         SubExecutor(): CustomPredicateExecutor("(a)-(b)") {
-            priority = 2;
+            priority = 3;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
@@ -85,7 +85,7 @@ class SubExecutor: public CustomPredicateExecutor {
 class MulExecutor: public CustomPredicateExecutor {
     public:
         MulExecutor(): CustomPredicateExecutor("(a)*(b)") {
-            priority = 3;
+            priority = 2;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
@@ -97,7 +97,7 @@ class MulExecutor: public CustomPredicateExecutor {
 class DivExecutor: public CustomPredicateExecutor {
     public:
         DivExecutor(): CustomPredicateExecutor("(a)/(b)") {
-            priority = 4;
+            priority = 1;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
@@ -155,15 +155,14 @@ class GreaterEqExecutor: public CustomPredicateExecutor {
 
 class IfExecutor: public CustomPredicateExecutor {
     public:
-        IfExecutor(): CustomPredicateExecutor("if((condition))((success))") {
-        }
-        std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
-            return CustomPredicateExecutor::predicateScope;
+        IfExecutor(): CustomPredicateExecutor("if((nscondition))((nssuccess))") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> condition = scope->get("condition");
-            std::shared_ptr<Object> block = scope->get("success");
-            if(std::dynamic_pointer_cast<Number>(condition->value(scope))->value())
+            std::shared_ptr<Object> condition = scope->get("nscondition");
+            std::shared_ptr<Object> block = scope->get("nssuccess");
+            auto number = std::dynamic_pointer_cast<Number>(exists(condition->value(scope)));
+            exists(number);
+            if(number->value())
                 return block->value(scope);
             return std::shared_ptr<Object>(nullptr);
         }
@@ -172,16 +171,15 @@ class IfExecutor: public CustomPredicateExecutor {
 
 class IfElseExecutor: public CustomPredicateExecutor {
     public:
-        IfElseExecutor(): CustomPredicateExecutor("if((condition))((success))else((failure))") {
-        }
-        std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
-            return CustomPredicateExecutor::predicateScope;
+        IfElseExecutor(): CustomPredicateExecutor("if((nscondition))((nssuccess))else((nsfailure))") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> condition = scope->get("condition");
-            std::shared_ptr<Object> block = scope->get("success");
-            std::shared_ptr<Object> alternative = scope->get("failure");
-            if(std::dynamic_pointer_cast<Number>(condition->value(scope))->value())
+            std::shared_ptr<Object> condition = scope->get("nscondition");
+            std::shared_ptr<Object> block = scope->get("nssuccess");
+            std::shared_ptr<Object> alternative = scope->get("nsfailure");
+            auto number = std::dynamic_pointer_cast<Number>(exists(condition->value(scope)));
+            exists(number);
+            if(number->value())
                 return block->value(scope);
             return alternative->value(scope);
         }
@@ -190,18 +188,79 @@ class IfElseExecutor: public CustomPredicateExecutor {
 
 class WhileExecutor: public CustomPredicateExecutor {
     public:
-        WhileExecutor(): CustomPredicateExecutor("while((condition))((loop))") {
-        }
-        std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
-            return CustomPredicateExecutor::predicateScope;
+        WhileExecutor(): CustomPredicateExecutor("while((nscondition))((nsloop))") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             std::shared_ptr<Object> ret = std::shared_ptr<Object>(nullptr);
-            auto condition = scope->get("condition");
-            auto loop = scope->get("loop");
+            auto condition = scope->get("nscondition");
+            auto loop = scope->get("nsloop");
             while(std::dynamic_pointer_cast<Number>(condition->value(scope))->value()) 
                 ret = loop->value(scope);
             return ret;
+        }
+};
+
+
+
+class SizeExecutor: public CustomPredicateExecutor {
+    public:
+        SizeExecutor(): CustomPredicateExecutor("size(nsblock)") {
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            std::shared_ptr<Object> block = exists(scope->get("nsblock"));
+            return std::make_shared<Number>(block->size());
+        }
+};
+
+class GetExecutor: public CustomPredicateExecutor {
+    public:
+        GetExecutor(): CustomPredicateExecutor("get(nsblock)(nsindex)") {
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            std::shared_ptr<Object> block = exists(scope->get("nsblock"));
+            std::shared_ptr<Object> i_obj = exists(scope->get("nsindex"));
+            auto i = std::dynamic_pointer_cast<Number>(i_obj);
+            exists(i);
+            return block->get((int)i->value());
+        }
+};
+
+class SetExecutor: public CustomPredicateExecutor {
+    public:
+        SetExecutor(): CustomPredicateExecutor("set(nsblock)(nsindex)(nsvalue)") {
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            std::shared_ptr<Object> block = exists(scope->get("nsblock"));
+            std::shared_ptr<Object> i_obj = exists(scope->get("nsindex"));
+            std::shared_ptr<Object> value = scope->get("nsvalue");
+            auto i = std::dynamic_pointer_cast<Number>(i_obj);
+            exists(i);
+            block->set((int)i->value(), value);
+            return value;
+        }
+};
+
+
+class SelfSetExecutor: public CustomPredicateExecutor {
+    public:
+        SelfSetExecutor(): CustomPredicateExecutor("set(nsname)(nsvalue)") {
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            std::shared_ptr<Object> name = exists(scope->get("nsname"));
+            std::shared_ptr<Object> value = scope->get("nsvalue");
+            scope->set(name->name(), value);
+            return value;
+        }
+};
+
+
+class SelfGetExecutor: public CustomPredicateExecutor {
+    public:
+        SelfGetExecutor(): CustomPredicateExecutor("get(nsname)") {
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            std::shared_ptr<Object> name = exists(scope->get("nsname"));
+            return scope->get(name->name());
         }
 };
 
@@ -215,7 +274,7 @@ std::string readfile(std::string path) {
 
 class LoadExecutor: public CustomPredicateExecutor {
     public:
-        LoadExecutor(): CustomPredicateExecutor("run(path)") {
+        LoadExecutor(): CustomPredicateExecutor("run(nspath)") {
         }
         std::shared_ptr<Scope> scoped(std::shared_ptr<Scope> scope) {
             return scope;
@@ -225,7 +284,7 @@ class LoadExecutor: public CustomPredicateExecutor {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             //try{
-                std::shared_ptr<Object> obj = exists(scope->get("path"));
+                std::shared_ptr<Object> obj = exists(scope->get("nspath"));
                 if(std::dynamic_pointer_cast<String>(obj)!=nullptr) {
                     std::string source = obj->name();
                     if(ends_with(source, ".ns"))
@@ -244,7 +303,7 @@ class LoadExecutor: public CustomPredicateExecutor {
 
 class CatchExecutor: public CustomPredicateExecutor {
     public:
-        CatchExecutor(): CustomPredicateExecutor("try((source))") {
+        CatchExecutor(): CustomPredicateExecutor("try((nssource))") {
         }
         std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
             return CustomPredicateExecutor::predicateScope;
@@ -253,7 +312,7 @@ class CatchExecutor: public CustomPredicateExecutor {
             std::list<std::shared_ptr<Object>> previous_stack(Object::stack);
             Object::stack.clear();
             try{
-                auto ret = exists(exists(scope->get("source"))->value(scope));
+                auto ret = exists(exists(scope->get("nssource"))->value(scope));
                 Object::stack = previous_stack;
                 return ret;
             }
@@ -289,6 +348,11 @@ int main(int argc, char *argv[]) {
     global->load(std::make_shared<GreaterEqExecutor>());
     global->load(std::make_shared<LoadExecutor>());
     global->load(std::make_shared<CatchExecutor>());
+    global->load(std::make_shared<SizeExecutor>());
+    global->load(std::make_shared<GetExecutor>());
+    global->load(std::make_shared<SetExecutor>());
+    global->load(std::make_shared<SelfSetExecutor>());
+    global->load(std::make_shared<SelfGetExecutor>());
     auto program = parse(source);
     //std::cout << program->name() << std::endl;
     program->value(global);

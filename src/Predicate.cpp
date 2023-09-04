@@ -47,17 +47,32 @@ std::shared_ptr<Object> Predicate::value(std::shared_ptr<Scope> scope) {
         std::map<std::string, std::shared_ptr<CustomPredicateExecutor>>executors_map;
         scope->gather_executors(executors_map);
         int max_length = 0;
+        int max_priority = -1000;
+        int first_pos = names_.size();
         std::vector<std::shared_ptr<CustomPredicateExecutor>> executors;
         for (const auto &it : executors_map)
             executors.push_back(it.second); 
-        std::sort(executors.begin(), executors.end(), sorter);
-
+        //std::sort(executors.begin(), executors.end(), sorter);
+    
         for(const auto& exec : executors) {
-            std::vector<std::shared_ptr<PredicatePart>> names = exec->match(names_);
-            if(names.size()>max_length) {
+            //if(exec->priority < max_priority)
+            //    continue;
+            //std::cout << exec->name() << "\n";
+            int pos = (exec->priority > max_priority)?names_.size()+1:first_pos;
+            std::vector<std::shared_ptr<PredicatePart>> names = exec->match(names_, pos);
+            //std::cout << exec->name() << pos << "\n";
+            //std::cout << name() << "\n";
+            if(names.size()==0)
+                continue;
+            if((exec->priority > max_priority) 
+                || ((exec->priority == max_priority) 
+                    && (pos<first_pos 
+                        || (pos==first_pos && names.size()>max_length)))) {
                 names_.assign(names.begin(), names.end());
                 executor = exec;
-                max_length = executor->priority; //names.size();
+                max_length = names.size();
+                first_pos = pos;
+                max_priority = exec->priority;
                 //break;
             }
         }

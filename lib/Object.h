@@ -22,6 +22,11 @@ class Object: public std::enable_shared_from_this<Object> {
         static std::string get_stack_trace();
         static std::list<std::shared_ptr<Object>> stack;
 
+        // vectorization
+        virtual void set(int i, std::shared_ptr<Object> value);
+        virtual std::shared_ptr<Object> get(int i);
+        virtual int size();
+
 };
 
 #endif // OBJECT_H

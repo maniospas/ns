@@ -1,0 +1,29 @@
+list((x)) := {x};
+(list)[(index)] := get(list,index);
+((a))~(b) := set(a,b);
+(a)[(index)]~(value) := {set(a,index,value)};
+
+iter(x) := {
+	i = 0;
+	next := (
+		condition = (i<size(x));
+		if(condition) (
+			position = i;
+			value = x[i];
+			i = i+1;
+		) else {0};
+		condition
+	);
+	new
+};
+for each ((symbol)) in (x) do ((body)) := (
+	iterator = iter(x);
+	while(iterator:next) (
+		set(symbol, iterator:value);
+		result = run(body);
+	);
+	pop(iterator);
+	pop(result)
+);
+
+new

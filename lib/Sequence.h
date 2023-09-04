@@ -2,16 +2,21 @@
 #define SEQUENCE_H
 
 #include <Object.h>
+#include <vector>
 
 class Sequence: public Object {
     private:
-        std::shared_ptr<Object> first_;
-        std::shared_ptr<Object> second_;
+        std::vector<std::shared_ptr<Object>> expressions;
     public:
         Sequence(std::shared_ptr<Object> first, std::shared_ptr<Object> second);
         virtual ~Sequence();
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        
+        // vectorization
+        void set(int i, std::shared_ptr<Object> value);
+        std::shared_ptr<Object> get(int i);
+        int size();
 };
 
 #endif // SEQUENCE_H

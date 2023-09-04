@@ -44,3 +44,17 @@ std::string Object::get_stack_trace() {
 }
 
 std::list<std::shared_ptr<Object>> Object::stack;
+
+
+void Object::set(int i, std::shared_ptr<Object> value){
+    error("Element setter not supported.");
+};
+
+std::shared_ptr<Object> Object::get(int i){
+    error("Element getter not supported.");
+    return shared_from_this();
+};
+
+int Object::size() {
+    return 0;
+};

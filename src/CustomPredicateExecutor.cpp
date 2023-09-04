@@ -33,16 +33,21 @@ std::shared_ptr<Object> create_predicate_or_primitive(std::vector<std::shared_pt
     return std::make_shared<Predicate>(gathered);
 }
 
-std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(std::vector<std::shared_ptr<PredicatePart>> names) {
+std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(
+    std::vector<std::shared_ptr<PredicatePart>>& names,
+    int& first_predicate_position) {
     std::vector<std::shared_ptr<PredicatePart>> ret;
     int i = 0;
+    int initial_first_predicate_position = first_predicate_position;
     //std::cout<<"checking "<<name()<<"\n";
     for(int pos=0;pos<names_.size();pos++) {
-        if(i>=names.size())
+        if(i>=names.size() || i>initial_first_predicate_position) // last condition prevents on average half of expressions from taking more time
             return non_matching_parts;
         if(names_[pos]->object()==nullptr) {
             if(names[i]->name()==names_[pos]->name()) {
                 ret.push_back(names[i]);
+                if(i<first_predicate_position)
+                    first_predicate_position = i;
                 i++;
             }
             else 

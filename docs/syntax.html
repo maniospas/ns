@@ -100,6 +100,14 @@
               <li class="nav-item"><a class="nav-link smaller-font" href="#functional-programming">Functional programming</a></li>
             </ul>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#new-scope-files">
+              Libraries
+            </a>
+			<ul class="nav flex-column ml-3">
+              <li class="nav-item"><a class="nav-link smaller-font" href="#list">list.ns</a></li>
+            </ul>
+          </li>
 		  
         </ul>
       </div>
@@ -396,12 +404,12 @@ magnitude(20, condition loose);
 		
         <section id="functional-programming">
 			<h4>Functional programming</h4>
-		<p>Functional programming is a programming paradigm that treats computation as the evaluation of mathematical functions and avoids changing state and mutable data. While NS doesn't have traditional functions in the way some other languages do, it supports functional programming principles through expressions and scope manipulation.</p>
+		<p>Functional programming is a paradigm that treats computation as the evaluation of mathematical functions, and avoids changing state and mutable data. While NS doesn't have traditional functions, it generalizes the same principles to expressions by letting them enclose appropriate methods to be called. For example:</p>
 		
-		<pre><code class="language-cpp">condition tight = {call(x):={x<10};new};
+		<pre><code class="language-cpp">condition tight = {call(x):={x<10};new}; // create functional types with different method names
 condition loose = {call(x):={x<100};new};
 magnitude(value, condition) := {
-	if(condition:call value) {  // parenthesis automatically detected, failback(:) avoids passing any x from magnitude in the condition's evaluation 
+	if(condition:call value) {  // failback (:) avoids using any x from magnitude in the condition 
 		print("small");
 	}
 	else {
@@ -417,6 +425,47 @@ magnitude(20, condition loose);  // large
 		</section>
 		
 		
+		</section>
+		
+		
+		
+      
+      <section id="new-scope-files">
+        <h1>New scope files (aka libraries)</h1>
+        <p>You can set the outcome of <a href="#running-files">running a file</a> to a variable. Files run in their parent scope, which means that you need to either gain all their declarations with a simple run or obtain their declaration from a bracket scope. To support this, return new at the end of runnable files. Consider the scope file utils.ns with contents:</p>
+		
+		<pre><code class="language-cpp">sqr(x) := x*x;
+pi = 3.14159;
+new
+</code></pre>	
+		
+		<p>To avoid compromising declaration safety, obtain the file's expression with brackets, like this:</p>
+		
+		<pre><code class="language-cpp">utils = {run(x*x)};  // you may add try at the beginning of this line
+x = 2;
+print(utils:sqr(2)); // 4
+</code></pre>	
+
+		<p>NS comes along with several scope files that implement popular functionalities using <a href="#metaprogramming">metaprogramming</a>. These are presented below.</p>
+		
+		
+        <section id="list">
+          <h4>list.ns</h4>
+          <p>This scope file creates lists from scopes.</p>
+		  
+		  
+		  <pre><code class="language-cpp">list = {run('list.ns')};
+		  
+x = list:list{'a';'b';'c'}; // list with three elements
+print(list:size(x)); // 3
+y = list:x[0]; // enter the scope to access its defined expressions
+print(list:x[0]); // a
+list:x[0] ~ 1024; // set list element
+print(list:x[0]); // 1024
+print(x); // the last element of the list
+list: for each i in x do {print(i);}; // 1024  b  c
+</code></pre>
+
 		</section>
 
 
