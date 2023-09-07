@@ -13,6 +13,7 @@ class Variable: public Object {
         virtual ~Variable();
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        const std::string type() const {return "variable";};
 };
 
 #endif

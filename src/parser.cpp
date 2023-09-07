@@ -14,7 +14,7 @@
 #include "Edit.h"
 #include "Fallfront.h"
 #include "String.h"
-#include "Predicate.h"
+#include "Expression.h"
 #include "PredicatePart.h"
 #include "CustomPredicateExecutor.h"
 
@@ -283,7 +283,7 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
         //return std::make_shared<Variable>(tokens[from]);
     }
     auto parts = predicate_parts(tokens, from, to);
-    return std::make_shared<Predicate>(parts);
+    return std::make_shared<Expression>(parts);
 }
 
 std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::string> tokens) {

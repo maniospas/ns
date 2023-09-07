@@ -1,5 +1,5 @@
-#ifndef PREDICATE_H
-#define PREDICATE_H
+#ifndef EXPRESSION_H
+#define EXPRESSION_H
 
 #include <string>
 #include <vector>
@@ -7,14 +7,15 @@
 #include "Object.h"
 #include "PredicatePart.h"
 
-class Predicate: public Object {
+class Expression: public Object {
     public:
         std::vector<std::shared_ptr<PredicatePart>> names_;
-        Predicate(std::vector<std::shared_ptr<PredicatePart>> names);
-        virtual ~Predicate();
+        Expression(std::vector<std::shared_ptr<PredicatePart>> names);
+        virtual ~Expression();
         const std::string name() const;
         const std::string assignment_name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        const std::string type() const {return "expression";};
 };
 
-#endif // PREDICATE_H
+#endif // EXPRESSION_H

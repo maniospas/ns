@@ -13,6 +13,7 @@ class Assign: public Object {
         virtual ~Assign();
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        const std::string type() const {return "assignment";};
 };
 
 #endif

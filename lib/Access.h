@@ -13,6 +13,7 @@ class Access: public Object {
         virtual ~Access();
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        const std::string type() const {return "accessor";};
 };
 
 #endif // ACCESS_H

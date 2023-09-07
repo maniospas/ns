@@ -13,6 +13,7 @@ class Fallfront: public Object {
         virtual ~Fallfront();
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        const std::string type() const {return "fallfront";};
 };
 
 #endif

@@ -14,6 +14,7 @@ class Unscoped: public Object
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
         std::shared_ptr<Object> contents() const {return object_;};
+        const std::string type() const {return "scope";};
         
         // vectorization
         void set(int i, std::shared_ptr<Object> value){object_->set(i, value);};

@@ -14,6 +14,7 @@ class Number: public Object
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
         const float value() const;
+        const std::string type() const {return "number";};
 };
 
 #endif

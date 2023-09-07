@@ -31,6 +31,7 @@ class Scope: public Object {
         void gather_executors(std::map<std::string, std::shared_ptr<CustomPredicateExecutor>>& executors);
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
         void load(std::shared_ptr<CustomPredicateExecutor> method);
+        const std::string type() const {return "scope";};
 };
 
 #endif

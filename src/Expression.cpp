@@ -1,4 +1,4 @@
-#include "Predicate.h"
+#include "Expression.h"
 #include "CustomPredicateExecutor.h"
 #include "Scope.h"
 #include "parser.h"
@@ -10,17 +10,17 @@
 #include <algorithm>
 
 
-Predicate::Predicate(std::vector<std::shared_ptr<PredicatePart>> names): names_(names) {
+Expression::Expression(std::vector<std::shared_ptr<PredicatePart>> names): names_(names) {
     for(int i=0;i<names_.size();i++)  {
         if(names_[i]==nullptr)
             error("Empty predicate part");
     }
 }
 
-Predicate::~Predicate() {
+Expression::~Expression() {
 }
 
-const std::string Predicate::name() const {
+const std::string Expression::name() const {
     std::string name = "";
     for(int i=0;i<names_.size();i++) {
         if(i)
@@ -36,7 +36,7 @@ bool sorter (std::shared_ptr<CustomPredicateExecutor> i, std::shared_ptr<CustomP
     return (i->priority<j->priority); 
 }
 
-std::shared_ptr<Object> Predicate::value(std::shared_ptr<Scope> scope) {
+std::shared_ptr<Object> Expression::value(std::shared_ptr<Scope> scope) {
     push();
     auto obj = scope->get(assignment_name());
     std::shared_ptr<CustomPredicateExecutor> executor = std::dynamic_pointer_cast<CustomPredicateExecutor>(obj);
@@ -84,9 +84,9 @@ std::shared_ptr<Object> Predicate::value(std::shared_ptr<Scope> scope) {
 
     }
     exists(executor);
-    auto value_scope = executor->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()));
-    if(executor->can_call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope)){
-        return pop(executor->call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope));
+    auto value_scope = executor->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()));
+    if(executor->can_call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope)){
+        return pop(executor->call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope));
     }
     auto overloaded_versions = std::vector<std::shared_ptr<CustomPredicateExecutor>>();
     scope->gather_overloads(assignment_name(), overloaded_versions);
@@ -95,15 +95,15 @@ std::shared_ptr<Object> Predicate::value(std::shared_ptr<Scope> scope) {
         if(exec==nullptr || exec==executor)
             continue; // do not match with variables, we have already checked that the executor does not fit
         // TODO: for HUGE speedup, create arguments as lists and only alignt the evaluations here to create a new scope
-        value_scope = exec->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()));
-        if(exec->can_call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope))
-          return pop(exec->call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope));
+        value_scope = exec->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()));
+        if(exec->can_call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope))
+          return pop(exec->call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope));
     }
     error("No implementation of "+executor->assignment_name()+" matches argument constraints");
     return pop(std::shared_ptr<Object>(nullptr));
 }
 
-const std::string Predicate::assignment_name() const {
+const std::string Expression::assignment_name() const {
     std::string name = "";
     for(int i=0;i<names_.size();i++) {
         if(i)

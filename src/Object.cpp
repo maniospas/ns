@@ -39,7 +39,7 @@ std::string Object::get_stack_trace() {
     std::string trace = "";
     for (auto obj : stack) {
         trace += "\nat ";
-        trace += std::string(typeid(*obj).name());
+        trace += obj->type();
         trace += " ";
         trace += obj->name();
     }

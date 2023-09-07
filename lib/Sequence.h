@@ -12,6 +12,7 @@ class Sequence: public Object {
         virtual ~Sequence();
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        const std::string type() const {return "next command";};
         
         // vectorization
         void set(int i, std::shared_ptr<Object> value);

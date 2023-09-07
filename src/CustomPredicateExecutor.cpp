@@ -31,7 +31,7 @@ std::shared_ptr<Object> create_predicate_or_primitive(std::vector<std::shared_pt
              || std::dynamic_pointer_cast<Unscoped>(gathered[0]->object())!=nullptr
         ))
             return gathered[0]->object();
-    return std::make_shared<Predicate>(gathered);
+    return std::make_shared<Expression>(gathered);
 }
 
 std::vector<std::shared_ptr<PredicatePart>> CustomPredicateExecutor::match(
@@ -148,7 +148,7 @@ void CustomPredicateExecutor::evaluate_argument(
 }
 
 
-std::shared_ptr<Scope> CustomPredicateExecutor::evaluate_all_arguments(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate) {
+std::shared_ptr<Scope> CustomPredicateExecutor::evaluate_all_arguments(std::shared_ptr<Scope> scope, std::shared_ptr<Expression> predicate) {
     auto prev_scope = scope;
     auto value_scope = vscoped(scope);
     auto derived_scope = scoped(scope);
@@ -164,7 +164,7 @@ std::shared_ptr<Scope> CustomPredicateExecutor::evaluate_all_arguments(std::shar
 }
 
 
-bool CustomPredicateExecutor::can_call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate, std::shared_ptr<Scope> derived_scope) {
+bool CustomPredicateExecutor::can_call(std::shared_ptr<Scope> scope, std::shared_ptr<Expression> predicate, std::shared_ptr<Scope> derived_scope) {
     for(const auto& name : names_) {
         auto prototype = name->object();
         if(prototype==nullptr)
@@ -196,7 +196,7 @@ bool CustomPredicateExecutor::can_call(std::shared_ptr<Scope> scope, std::shared
     return true;
 }
 
-std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate, std::shared_ptr<Scope> derived_scope) {
+std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> scope, std::shared_ptr<Expression> predicate, std::shared_ptr<Scope> derived_scope) {
     return implement(derived_scope);
 }
 

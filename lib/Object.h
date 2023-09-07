@@ -14,6 +14,7 @@ class Object: public std::enable_shared_from_this<Object> {
         std::shared_ptr<Object> pop(std::shared_ptr<Object> object);
     public:
         Object();
+        virtual const std::string type() const = 0;
         virtual const std::string name() const = 0;
         virtual std::shared_ptr<Object> value(std::shared_ptr<Scope> scope) = 0;
         virtual std::shared_ptr<Object> get(const std::string& name);

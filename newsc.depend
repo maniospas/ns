@@ -85,7 +85,7 @@
 	"Object.h"
 
 1693322596 source:c:\users\manio\desktop\newsc\newsc\src\predicate.cpp
-	"Predicate.h"
+	"Expression.h"
 	"CustomPredicateExecutor.h"
 	"Scope.h"
 	<iostream>
@@ -118,7 +118,7 @@
 	<vector>
 	<memory>
 	"Object.h"
-	"Predicate.h"
+	"Expression.h"
 	"PredicatePart.h"
 	"Scope.h"
 
@@ -135,7 +135,7 @@
 	"Scoped.h"
 	"Unscoped.h"
 	"Access.h"
-	"Predicate.h"
+	"Expression.h"
 	"CustomPredicateExecutor.h"
 
 1693322710 source:c:\users\manio\desktop\newsc\newsc\src\parser.cpp
@@ -153,7 +153,7 @@
 	"Unscoped.h"
 	"Access.h"
 	"String.h"
-	"Predicate.h"
+	"Expression.h"
 	"PredicatePart.h"
 	"CustomPredicateExecutor.h"
 
