@@ -1,0 +1,71 @@
+Date : 2023-09-05 02:45:06
+Directory : c:\Users\manio\Desktop\newsc\newsc
+Total : 39 files,  2114 codes, 67 comments, 407 blanks, all 2588 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| C++        |         33 |      1,561 |         60 |        273 |      1,894 |
+| HTML       |          3 |        530 |          3 |        126 |        659 |
+| Markdown   |          1 |         15 |          0 |          6 |         21 |
+| JavaScript |          1 |          7 |          2 |          1 |         10 |
+| CSS        |          1 |          1 |          2 |          1 |          4 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                  |         39 |      2,114 |         67 |        407 |      2,588 |
+| . (Files)                                                          |          2 |        342 |          7 |         49 |        398 |
+| docs                                                               |          5 |        538 |          7 |        128 |        673 |
+| lib                                                                |         16 |        331 |          4 |         80 |        415 |
+| src                                                                |         16 |        903 |         49 |        150 |      1,102 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                           | language   | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\Users\manio\Desktop\newsc\newsc\README.md                       | Markdown   |         15 |          0 |          6 |         21 |
+| c:\Users\manio\Desktop\newsc\newsc\docs\index.html                 | HTML       |         45 |          1 |          8 |         54 |
+| c:\Users\manio\Desktop\newsc\newsc\docs\prism.css                  | CSS        |          1 |          2 |          1 |          4 |
+| c:\Users\manio\Desktop\newsc\newsc\docs\prism.js                   | JavaScript |          7 |          2 |          1 |         10 |
+| c:\Users\manio\Desktop\newsc\newsc\docs\start.html                 | HTML       |        108 |          0 |         14 |        122 |
+| c:\Users\manio\Desktop\newsc\newsc\docs\syntax.html                | HTML       |        377 |          2 |        104 |        483 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Access.h                    | C++        |         15 |          0 |          4 |         19 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Assign.h                    | C++        |         15 |          0 |          4 |         19 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\CustomPredicateExecutor.h   | C++        |         37 |          0 |          5 |         42 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Edit.h                      | C++        |         17 |          0 |          4 |         21 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Fallfront.h                 | C++        |         15 |          0 |          4 |         19 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Number.h                    | C++        |         16 |          0 |          4 |         20 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Object.h                    | C++        |         25 |          1 |          7 |         33 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Predicate.h                 | C++        |         17 |          0 |          4 |         21 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\PredicatePart.h             | C++        |         32 |          0 |          6 |         38 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Scope.h                     | C++        |         30 |          0 |          4 |         34 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Scoped.h                    | C++        |         17 |          1 |          6 |         24 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Sequence.h                  | C++        |         17 |          1 |          5 |         23 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\String.h                    | C++        |         16 |          0 |          4 |         20 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Unscoped.h                  | C++        |         18 |          1 |          7 |         26 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\Variable.h                  | C++        |         14 |          0 |          5 |         19 |
+| c:\Users\manio\Desktop\newsc\newsc\lib\parser.h                    | C++        |         30 |          0 |          7 |         37 |
+| c:\Users\manio\Desktop\newsc\newsc\ns.cpp                          | C++        |        327 |          7 |         43 |        377 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Access.cpp                  | C++        |         21 |          0 |          6 |         27 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Assign.cpp                  | C++        |         16 |          0 |          5 |         21 |
+| c:\Users\manio\Desktop\newsc\newsc\src\CustomPredicateExecutor.cpp | C++        |        155 |          2 |         21 |        178 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Edit.cpp                    | C++        |         21 |          0 |          6 |         27 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Fallfront.cpp               | C++        |         23 |          0 |          6 |         29 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Number.cpp                  | C++        |         14 |          0 |          6 |         20 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Object.cpp                  | C++        |         44 |          0 |         16 |         60 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Predicate.cpp               | C++        |         76 |         13 |         10 |         99 |
+| c:\Users\manio\Desktop\newsc\newsc\src\PredicatePart.cpp           | C++        |         33 |          0 |         15 |         48 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Scope.cpp                   | C++        |        107 |         10 |         14 |        131 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Scoped.cpp                  | C++        |         16 |          0 |          7 |         23 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Sequence.cpp                | C++        |         52 |          0 |          8 |         60 |
+| c:\Users\manio\Desktop\newsc\newsc\src\String.cpp                  | C++        |         11 |          0 |          5 |         16 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Unscoped.cpp                | C++        |         15 |          0 |          5 |         20 |
+| c:\Users\manio\Desktop\newsc\newsc\src\Variable.cpp                | C++        |         15 |          3 |          5 |         23 |
+| c:\Users\manio\Desktop\newsc\newsc\src\parser.cpp                  | C++        |        284 |         21 |         15 |        320 |
+| Total                                                              |            |      2,114 |         67 |        407 |      2,588 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+

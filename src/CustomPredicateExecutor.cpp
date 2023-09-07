@@ -4,6 +4,7 @@
 #include <iostream>
 #include "parser.h"
 #include "Number.h"
+#include "Edit.h"
 #include "Scoped.h"
 #include "Unscoped.h"
 
@@ -130,18 +131,24 @@ void CustomPredicateExecutor::evaluate_argument(
     std::shared_ptr<Object> prototype, 
     std::shared_ptr<Object> expression, 
     std::shared_ptr<Scope> value_scope) {
-    if(std::dynamic_pointer_cast<Unscoped>(prototype)!=nullptr)
+    if(std::dynamic_pointer_cast<Unscoped>(prototype)!=nullptr) 
         prototype = exists(std::dynamic_pointer_cast<Unscoped>(prototype)->contents());
     if(std::dynamic_pointer_cast<Unscoped>(prototype)!=nullptr){
         std::string name = exists(exists(std::dynamic_pointer_cast<Unscoped>(prototype)->contents())->value(CustomPredicateExecutor::predicateScope))->name();
         derived_scope->set(name, expression);
     }
-    else
-        derived_scope->set(prototype->value(CustomPredicateExecutor::predicateScope)->name(), 
-                            exists(expression->value(value_scope)));
+    else {
+        auto value = expression->value(value_scope);
+        auto edit = std::dynamic_pointer_cast<Edit>(prototype);
+        if(edit!=nullptr)
+            prototype = edit->object();
+        std::string assign_name = prototype->value(CustomPredicateExecutor::predicateScope)->name();
+        derived_scope->set(assign_name, value);
+    }
 }
 
-std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate) {
+
+std::shared_ptr<Scope> CustomPredicateExecutor::evaluate_all_arguments(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate) {
     auto prev_scope = scope;
     auto value_scope = vscoped(scope);
     auto derived_scope = scoped(scope);
@@ -153,6 +160,43 @@ std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> sco
                 evaluate_argument(derived_scope, names_[i]->object(), expression, value_scope);
         }
     derived_scope = descoped(derived_scope);
+    return derived_scope;
+}
+
+
+bool CustomPredicateExecutor::can_call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate, std::shared_ptr<Scope> derived_scope) {
+    for(const auto& name : names_) {
+        auto prototype = name->object();
+        if(prototype==nullptr)
+            continue;
+        if(std::dynamic_pointer_cast<Unscoped>(prototype)!=nullptr)
+            prototype = std::dynamic_pointer_cast<Unscoped>(prototype)->contents();
+        auto edit = std::dynamic_pointer_cast<Edit>(prototype);
+        if(edit==nullptr) 
+            continue;
+        prototype = edit->object();
+        if(prototype==nullptr)
+            error("Missing name in conditional argument declaration (empty name before :).");
+        std::string assign_name = prototype->value(CustomPredicateExecutor::predicateScope)->name();
+        auto prototype_object = derived_scope->get(assign_name);
+        if(prototype_object==nullptr)
+            error("Argument '"+assign_name+"' not found in the argument declaration's evaluation scope (this shouldn't happen).");
+        auto entered = std::make_shared<Scope>(prototype_object);
+        auto condition = edit->expression();
+        if(condition==nullptr) 
+            error("Missing condition in argument declaration (empty expression after :, use unconditional declaration).");
+        auto valid = condition->value(entered);
+        if(valid==nullptr)
+            return false;
+            //error("Argument condition returned None (should return either true of false).");
+        auto number = std::dynamic_pointer_cast<Number>(valid);
+        if(number==nullptr || !number->value())
+            return false;//error("Argument condition not satisfied due to return 0.");
+    }
+    return true;
+}
+
+std::shared_ptr<Object> CustomPredicateExecutor::call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate, std::shared_ptr<Scope> derived_scope) {
     return implement(derived_scope);
 }
 

@@ -1,0 +1,5 @@
+Complex(re,im):= {class=('complex'); new};
+(a:try class is ('complex')) + (b:try class is ('complex')) := Complex((a:re)+(b:re), (a:im)+(b:im));
+(a:try class is ('complex')) - (b:try class is ('complex')) := Complex((a:re)-(b:re), a:im-b:im);
+(a:try class is ('complex')) * (b:try class is ('complex')) := Complex(((a:re)*(b:re))-((a:im)*(b:im)), ((a:re)*(b:im))+((a:im)*(b:re)));
+new

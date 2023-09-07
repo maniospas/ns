@@ -4,12 +4,14 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <vector>
 #include "Object.h"
 class CustomPredicateExecutor;
 
 class Scope: public Object {
     private:
         std::map<std::string, std::shared_ptr<Object>> values;
+        std::map<std::string, std::unique_ptr<std::vector<std::shared_ptr<Object>>>> overloaded;
         std::shared_ptr<Object> overlap(const std::string& name, const std::shared_ptr<Object> value);
     public:
         Scope(const std::shared_ptr<Object> parent=std::shared_ptr<Object>(nullptr),
@@ -22,6 +24,7 @@ class Scope: public Object {
         virtual ~Scope();
         void set(const std::string& name, const std::shared_ptr<Object> value);
         std::shared_ptr<Object> get(const std::string& name);
+        void gather_overloads(const std::string& signature, std::vector<std::shared_ptr<CustomPredicateExecutor>>& overloads);
         std::shared_ptr<Scope> enter();
         int size() const;
         const std::string name() const;

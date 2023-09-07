@@ -33,22 +33,61 @@ void Scope::gather_executors(std::map<std::string, std::shared_ptr<CustomPredica
         && (casted=std::dynamic_pointer_cast<CustomPredicateExecutor>(it->second))!=nullptr
         && executors.find(it->first)==executors.end())
             executors[it->first] = casted;
-
-    if(values["super"]!=nullptr)
-        std::dynamic_pointer_cast<Scope>(values["super"])->gather_executors(executors);
+    auto superscope = values["super"];
+    if(superscope!=nullptr && std::dynamic_pointer_cast<Scope>(superscope)!=nullptr)
+        std::dynamic_pointer_cast<Scope>(superscope)->gather_executors(executors);
     if(values["fallback"]!=nullptr)
         std::dynamic_pointer_cast<Scope>(values["fallback"])->gather_executors(executors);
     if(values["failback"]!=nullptr)
         std::dynamic_pointer_cast<Scope>(values["failback"])->gather_executors(executors);
 }
 
+
+void Scope::gather_overloads(const std::string& signature, std::vector<std::shared_ptr<CustomPredicateExecutor>>& overloads) {
+    if(values["fallfront"]!=nullptr)
+        std::dynamic_pointer_cast<Scope>(values["fallfront"])->gather_overloads(signature, overloads);
+    
+    std::shared_ptr<CustomPredicateExecutor> casted;
+    auto it = overloaded.find(signature);
+    if(it!=overloaded.end()) {
+        //auto N = overloads.size();
+        //overloads.reserve(N+it->second->size());
+        for(const auto& second : *it->second)
+            if((casted=std::dynamic_pointer_cast<CustomPredicateExecutor>(second))!=nullptr
+                && it->first == signature) {
+                overloads.push_back(casted);
+                //N++;
+            }
+    }
+
+    auto superscope = values["super"];
+    if(superscope!=nullptr && std::dynamic_pointer_cast<Scope>(superscope)!=nullptr)
+        std::dynamic_pointer_cast<Scope>(superscope)->gather_overloads(signature, overloads);
+    if(values["fallback"]!=nullptr)
+        std::dynamic_pointer_cast<Scope>(values["fallback"])->gather_overloads(signature, overloads);
+    if(values["failback"]!=nullptr)
+        std::dynamic_pointer_cast<Scope>(values["failback"])->gather_overloads(signature, overloads);
+    
+}
+
 void Scope::set(const std::string& name, const std::shared_ptr<Object> value) {
     if(name!="new" && values["new"]!=nullptr)
         values["new"]->set(name, value);
-    else if(value==nullptr)
+    else if(value==nullptr) 
         values.erase(name);
-    else 
+    else {
         values[name] = value;
+        auto edit = std::dynamic_pointer_cast<CustomPredicateExecutor>(value);
+        if(edit!=nullptr) {
+            auto it = overloaded.find(name);
+            if(it==overloaded.end()) {
+                overloaded[name] = std::make_unique<std::vector<std::shared_ptr<Object>>>();
+                overloaded[name]->push_back(value);
+            }
+            else
+                it->second->push_back(value);
+        }
+    }
 }
 
 std::shared_ptr<Object> Scope::overlap(const std::string& name, const std::shared_ptr<Object> value) {

@@ -1,0 +1,6 @@
+dict := {class="dict";data={new};new};
+(dict:class is ('dict'))[(index)] := {dict:data:get(index)};
+(dict:class is ('dict'))[(index)]~(value) := {dict:data:set(index,value)};
+del (dict)[(index)] := {dict:data:pop(index)};
+
+new

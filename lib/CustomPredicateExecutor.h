@@ -32,10 +32,11 @@ class CustomPredicateExecutor: public Object {
         const std::string name() const;
         const std::string assignment_name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
-        virtual std::shared_ptr<Object> call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate);
+        virtual std::shared_ptr<Scope> evaluate_all_arguments(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate);
+        virtual std::shared_ptr<Object> call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate, std::shared_ptr<Scope> derived_scope);
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) = 0;
         static std::shared_ptr<Scope> predicateScope;
-
+        virtual bool can_call(std::shared_ptr<Scope> scope, std::shared_ptr<Predicate> predicate, std::shared_ptr<Scope> derived_scope) ;
 };
 
 #endif

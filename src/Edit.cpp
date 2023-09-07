@@ -14,7 +14,7 @@ const std::string Edit::name() const {
 
 std::shared_ptr<Object> Edit::value(std::shared_ptr<Scope> scope) {
     push();
-    auto object = object_->value(scope);
+    auto object = exists(object_->value(scope));
     std::shared_ptr<Scope> entered = std::dynamic_pointer_cast<Scope>(object);
     exists(entered);
     auto enchanced = std::make_shared<Scope>(entered, 

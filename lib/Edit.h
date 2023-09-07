@@ -13,6 +13,8 @@ class Edit: public Object {
         virtual ~Edit();
         const std::string name() const;
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
+        std::shared_ptr<Object>& object() {return object_;};
+        std::shared_ptr<Object>& expression() {return name_;};
 };
 
 #endif

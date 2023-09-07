@@ -71,11 +71,28 @@ std::vector<std::string> tokenize(const std::string& source) {
         char c = source[i];
         if(c=='"')
             c = '\'';
-        if(c=='\'')
+        if(c=='\'') {
             string_mode = !string_mode;
+            if(string_mode) {
+                if(pending.length())
+                    tokens.push_back(pending);
+                pending = std::string(1, c);
+                continue;
+            }
+            else {
+                pending += c;
+                tokens.push_back(pending);
+                pending = "";
+                continue;
+            }
+        }
+        if(string_mode) {
+            pending += c;
+            continue;
+        }
         if(c=='/' && i<sN-1 && source[i+1]=='/' && !string_mode)
             comments = true;
-        if(c=='\n' && !string_mode) {
+        if(c=='\n') {
             c = ' ';
             comments = false;
         }
@@ -86,7 +103,7 @@ std::vector<std::string> tokenize(const std::string& source) {
         if(!isalpha(c) && !isdigit(c)) {
             if(pending.length())
                 tokens.push_back(pending);
-            if(c==',' && last_parenthesis!=',' && !string_mode) {
+            if(c==',' && last_parenthesis!=',') {
                 tokens.push_back(std::string(1, last_parenthesis_close));
                 tokens.push_back(std::string(1, last_parenthesis));
             }
@@ -159,7 +176,7 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
         to -= 1;
     if(from>to)
         return std::shared_ptr<Object>(nullptr);
-    if(tokens[from]=="'" && tokens[to]=="'") {
+    /*if(tokens[from]=="'" && tokens[to]=="'") {
         bool broken = false;
         for(int i=from+1;i<to;i++)
             if(tokens[i]=="'") {
@@ -172,7 +189,7 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
                 str += tokens[i];
             return std::make_shared<String>(str);
         }
-    }
+    }*/
     if(tokens[from]=="{" && tokens[to]=="}") {
         int depth = 0;
         bool broken = false;
@@ -239,17 +256,17 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
             return std::make_shared<Callable>(predicate_parts(tokens, from, i-1), parse(tokens, i+1, to));
         if(tokens[i]=="=")
             return std::make_shared<Assign>(parse(tokens, from, i-1), parse(tokens, i+1, to));
-        if(tokens[i]=="."){
+        if(tokens[i]==".") {
             pos_access = i;
             if(pos_access!=-1)
                 return std::make_shared<Access>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
         }
-        if(tokens[i]==":"){
+        if(tokens[i]==":") {
             pos_access = i;
             if(pos_access!=-1)
                 return std::make_shared<Edit>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
         }
-        if(tokens[i]=="#"){
+        if(tokens[i]=="#") {
             pos_access = i;
             if(pos_access!=-1)
                 return std::make_shared<Fallfront>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
@@ -258,6 +275,9 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
 
     // convert to variable if only one token remaining
     if(from==to) {
+        if(tokens[from][0]=='\'' && tokens[from][tokens[from].length()-1]=='\'') {
+            return std::make_shared<String>(tokens[from].substr(1, tokens[from].length()-2));
+        }
         if(is_number_convertible(tokens[from]))
             return std::make_shared<Number>(std::stof(tokens[from]));
         //return std::make_shared<Variable>(tokens[from]);
@@ -301,6 +321,8 @@ std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::str
         else if(depth==0) {
             if(is_number_convertible(token))
                 predicateParts.push_back(std::make_shared<PredicatePartObject>(std::make_shared<Number>(std::stof(token))));
+            else if(token[0]=='\'' && token[token.length()-1]=='\'') 
+                predicateParts.push_back(std::make_shared<PredicatePartObject>(std::make_shared<String>(token.substr(1, token.length()-2))));
             else
                 predicateParts.push_back(std::make_shared<PredicatePartWord>(token));
         }

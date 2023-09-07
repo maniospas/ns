@@ -96,6 +96,7 @@
             </a>
 			<ul class="nav flex-column ml-3">
               <li class="nav-item"><a class="nav-link smaller-font" href="#runtime-parsing">Runtime parsing</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#expression-overloading">Expression overloading</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#arithmetics">Metaprogramming</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#functional-programming">Functional programming</a></li>
             </ul>
@@ -365,6 +366,22 @@ print(output);
 		  </p>
 		  
 		  <p>Unparsed expression are parsed at the first point where their values is retrieved, and to make complex code run fastly the outcome of parsing is retained for future use.</p>
+        </section>
+		
+		
+        <section id="expression-overloading">
+          <h4>Expression overloading</h4>
+          <p>NS supports expressions with the same syntax that compute differently for different arguments. 
+		  Doing this is done with a fallback into each argument's scope (this has as supperscope the expression's calling scope). For the arguments this is applied, the fallback should compute to either true (1) or false (0), given whether an argument being checked is accepted or not. The following example shows how to declare different implementations. 
+		  </p>
+		  
+		  <pre><code class="language-cpp">
+		  Complex(re,im):= {class='complex'; new};
+		  (a:try class is 'complex') + (b:try class is 'complex') := Complex(a.re+b.re, a.im+b.im);
+		  (a:try class is 'complex') - (b:try class is 'complex') := Complex(a.re-b.re, a.im-b.im);
+		  (a:try class is 'complex') * (b:try class is 'complex') := Complex((a.re*b.re)-(a.im*b.im), (a.re*b.im)+(a.im*b.re));
+</code></pre>
+	
         </section>
 		
 		

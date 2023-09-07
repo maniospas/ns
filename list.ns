@@ -1,23 +1,22 @@
-list((x)) := {x};
-(list)[(index)] := get(list,index);
-((a))~(b) := set(a,b);
-(a)[(index)]~(value) := {set(a,index,value)};
+list((data)) := {class='list';new};
+(list:class is ('list'))[(index)] := get(list:data, index);
+(list:class is ('list'))[(index)]~(value) := {set(list:data,index,value)};
 
-iter(x) := {
+iter(list) := {
 	i = 0;
 	next := (
-		condition = (i<size(x));
+		condition = (i<size(list:data));
 		if(condition) (
 			position = i;
-			value = x[i];
+			value = list[i];
 			i = i+1;
 		) else {0};
 		condition
 	);
 	new
 };
-for each ((symbol)) in (x) do ((body)) := (
-	iterator = iter(x);
+for each ((symbol)) in (list) do ((body)) := (
+	iterator = iter(list);
 	while(iterator:next) (
 		set(symbol, iterator:value);
 		result = run(body);

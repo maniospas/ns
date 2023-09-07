@@ -84,7 +84,23 @@ std::shared_ptr<Object> Predicate::value(std::shared_ptr<Scope> scope) {
 
     }
     exists(executor);
-    return pop(executor->call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this())));
+    auto value_scope = executor->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()));
+    if(executor->can_call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope)){
+        return pop(executor->call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope));
+    }
+    auto overloaded_versions = std::vector<std::shared_ptr<CustomPredicateExecutor>>();
+    scope->gather_overloads(assignment_name(), overloaded_versions);
+    for(auto const& version : overloaded_versions) {
+        auto exec = std::dynamic_pointer_cast<CustomPredicateExecutor>(version);
+        if(exec==nullptr || exec==executor)
+            continue; // do not match with variables, we have already checked that the executor does not fit
+        // TODO: for HUGE speedup, create arguments as lists and only alignt the evaluations here to create a new scope
+        value_scope = exec->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()));
+        if(exec->can_call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope))
+          return pop(exec->call(scope, std::dynamic_pointer_cast<Predicate>(shared_from_this()), value_scope));
+    }
+    error("No implementation of "+executor->assignment_name()+" matches argument constraints");
+    return pop(std::shared_ptr<Object>(nullptr));
 }
 
 const std::string Predicate::assignment_name() const {

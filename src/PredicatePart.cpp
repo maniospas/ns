@@ -19,11 +19,9 @@ std::string PredicatePartWord::assignment_name() const {
     return name_;
 }
 
-
 std::shared_ptr<Object> PredicatePartWord::object() const {
     return std::shared_ptr<Object>(nullptr);
 }
-
 
 PredicatePartObject::PredicatePartObject(std::shared_ptr<Object> object): object_(object) {
 }

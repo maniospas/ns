@@ -38,7 +38,10 @@ std::shared_ptr<Object> Object::pop(std::shared_ptr<Object> object) {
 std::string Object::get_stack_trace() {
     std::string trace = "";
     for (auto obj : stack) {
-        trace += "\nat "+obj->name();
+        trace += "\nat ";
+        trace += std::string(typeid(*obj).name());
+        trace += " ";
+        trace += obj->name();
     }
     return trace;
 }
