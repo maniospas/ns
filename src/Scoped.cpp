@@ -18,5 +18,5 @@ std::shared_ptr<Object> Scoped::value(std::shared_ptr<Scope> scope) {
     std::shared_ptr<Scope> entered = scope->enter();
     
 
-    return pop(exists(object_)->value(entered));
+    return pop(exists(object_, "scope contents")->value(entered));
 }

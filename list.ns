@@ -1,8 +1,14 @@
-list((data)) := {class='list';new};
-(list:class is ('list'))[(index)] := get(list:data, index);
-(list:class is ('list'))[(index)]~(value) := {set(list:data,index,value)};
+list((data)) := {
+	class='list';
+	data=data;
+	size:=size(data);
+	iter:=iter(data);
+	new
+};
+(list:(try(class, 0)) is 'list')[(index)] := get(list:data, index);
+(list:(try(class, 0)) is 'list')[(index)]~(value) := {set(list:data,index,value)};
 
-iter(list) := {
+iter(list:(try(class, 0)) is 'list') := {
 	i = 0;
 	next := (
 		condition = (i<size(list:data));
@@ -15,7 +21,8 @@ iter(list) := {
 	);
 	new
 };
-for each ((symbol)) in (list) do ((body)) := (
+
+for each ((symbol)) in (list:(try(class, 0)) is 'list') do ((body)) := (
 	iterator = iter(list);
 	while(iterator:next) (
 		set(symbol, iterator:value);

@@ -11,6 +11,7 @@ class Object: public std::enable_shared_from_this<Object> {
     protected:
         void push();
         std::shared_ptr<Object> exists(std::shared_ptr<Object> object);
+        std::shared_ptr<Object> exists(std::shared_ptr<Object> object, const std::string& explanation);
         std::shared_ptr<Object> pop(std::shared_ptr<Object> object);
     public:
         Object();
@@ -22,6 +23,8 @@ class Object: public std::enable_shared_from_this<Object> {
         virtual const std::string assignment_name() const;
         static std::string get_stack_trace();
         static std::list<std::shared_ptr<Object>> stack;
+        virtual bool is_primitive() {return false;};
+        virtual bool is_parsed() {return false;};
 
         // vectorization
         virtual void set(int i, std::shared_ptr<Object> value);

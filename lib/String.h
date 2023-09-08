@@ -15,6 +15,8 @@ class String: public Object
         std::shared_ptr<Object> value(std::shared_ptr<Scope> scope);
         const float value() const;
         const std::string type() const {return "string";};
+        bool is_primitive() {return true;};
+        bool is_parsed() {return true;};
 };
 
 #endif // STRING_H

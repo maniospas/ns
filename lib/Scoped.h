@@ -19,6 +19,7 @@ class Scoped: public Object
         std::shared_ptr<Object> get(int i){return object_->get(i);};
         int size(){return object_->size();};
         const std::string type() const {return "scope";};
+        bool is_parsed() {return true;};
 };
 
 #endif // SCOPED_H

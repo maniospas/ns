@@ -1,5 +1,4 @@
 #include "Object.h"
-#include "Variable.h"
 #include "parser.h"
 
 
@@ -24,7 +23,13 @@ void Object::push() {
 
 std::shared_ptr<Object> Object::exists(std::shared_ptr<Object> object) {
     if(object==nullptr)
-        error("Predicate or variable does not exist");
+        error("Expression does not exist");
+    return object;
+}
+
+std::shared_ptr<Object> Object::exists(std::shared_ptr<Object> object, const std::string& explanation) {
+    if(object==nullptr)
+        error("Expression does not exist: "+explanation);
     return object;
 }
 

@@ -125,21 +125,21 @@
       
       <section id="language-core">
         <h1>Language core</h1>
-        <p>NS is designed with the idea of treating scopes, code blocks, and objects interchangeably, providing a user-friendly interface with powerful code design options. It even allows programs to modify their own source code.
+        <p>NS treats scopes, code blocks, and objects interchangeably. Thus, it lets a simple interface control powerful code design and self-modification options. The language has only a few core operations and keywords to remember.
 		</p>
         <section id="assignment-scope">
           <h4>Assignment scope</h4>
-		  <p>In NS, scopes are like blocks of code with clearly defined rules regarding which variables or programming commands they can access. Let's focus on setting and accessing variables for now. Starting from a top-level scope, you can declare new scopes inside it, separated by semicolons. Scopes can be enclosed within brackets or parentheses. Parentheses can be omitted when running a single formula, such as assignment or printing. Bracketed scopes do not modify external variables unless they explicitly access them via objects. Here's an example:
+		  <p>In NS, scopes are like blocks of code with clearly defined rules regarding which variables or programming commands they can access. Let's focus on setting and accessing variables for now with the := operation. Starting from a top-level scope, you can declare new scopes inside it, separated by semicolons. Scopes can be enclosed within brackets or parentheses. Parentheses can be omitted when running a single formula, such as assignment or printing. Bracketed scopes do not modify external variables unless they explicitly access them via objects. Here's an example:
 		  </p>
 
-<pre><code class="language-cpp">x = 0;
+<pre><code class="language-cpp">x := 0;
 {
-	x = 1;
+	x := 1;
 	print(x); //0
 };
 print(x); //1
 (
-	x = 1;
+	x := 1;
 	print(x); //0
 );
 print(x); //1</code></pre>
@@ -147,7 +147,7 @@ print(x); //1</code></pre>
 		<p>The last expression of scopes doesn't require a semicolon and serves as a returned value. Prefer bracketed scopes for safe assignments, but parentheses scopes have lower execution time overhead.</p>
 		
 <pre><code class="language-cpp">y = {
-	x = 1;
+	x := 1;
 	x
 };
 print(y); //1</code></pre>
@@ -155,52 +155,62 @@ print(y); //1</code></pre>
         </section>
 		
 		
+		<div class="alert alert-info" role="alert">
+			Using expression definitions, which will be discussed later on, you can define your own assignment expressions, like x=y, and even overload them to change for different types of data.
+		</div>
+		
+		
+		
+		
 
         <section id="scopes-as-objects">
           <h4>Scopes as objects</h4>
           <p>In NS, scopes can be treated like objects that hold their assigned variables. You can access object fields using the dot operator. This view is retrieved from the `new` variable. For example:</p>
 <pre><code class="language-cpp">point = {
-	x = 1;
-	y = 2;
+	x := 1;
+	y := 2;
 	new
 };
 print(point.x); //1
 print(point.y); //1</code></pre>
 		
-		<p>All scopes have additional variables (super, fallback, failback, fallfront) for variable retrieval. Super refers to the superscope, which is one level higher in the scope hierarchy. When a variable is not found in a scope, it's retrieved from the superscope. Scopes always write variables on `new`. For example:</p>
+		<p>All scopes have some additional variables that may modify their behavior (super, new, surface). Of these, `super` refers to the superscope, which is one level higher in the scope declaration hierarchy. When a variable is not found in a scope, it's retrieved from the superscope. 'new' refers to the scope itslef and can be returned to construct objects from scopes. For example:</p>
 		
-<pre><code class="language-cpp">z = 1;
+<pre><code class="language-cpp">z := 1;
 point = {
-	x=z;
-	y=2;
+	x:=z;
+	y:=2;
 	new
 };
-z = 0;
+z := 0;
 print(point.super.z); //0
 print(point.x); //1
 print(point.super.z); //1</code></pre>
-
         </section>
         
 		
         <section id="define-expressions">
           <h4>Define expressions</h4>
-          <p>NS allows the assignment of expressions, that is, callable formulas. These define various predicate-based notations that include spaces and can have any number of positional arguments. Arguments are enclosed in parentheses, and the comma is treated as a shorthand for `()`. For instance, you can define a constructor for class objects like this:<p> 
+          <p>NS supports expressions, that is, callable formulas. These define various predicate-based notations that include spaces and can have any number of positional arguments. Arguments are enclosed in parentheses, and the comma is treated as a shorthand for `()`. For instance, you can define a constructor for class objects like this:<p> 
 
 <pre><code class="language-cpp">Point(x,y,z) := { // x, y, z automatically accessed from super
     new
 };
-point = Point(1,2,3);
+point := Point(1,2,3);
 print(point.x); //1
 print(point.y); //2
 print(point.z); //3
 </code></pre>
+		
+		<div class="alert alert-info" role="alert">
+			Variables are formulas without arguments that always output the same value.
+		</div>
 
-		<p>Formula implementations can be scoped in brackets, and internal assignments are transferred to their superscope. For example:
+		<p>Formula implementations can be scoped in parentheses to transfer their internal assignments to the scope they are called from. For example:
 
 <pre><code class="language-cpp">Point(x,y,z) := {
     norm squared:=x*x + y*y + z*z; 
-    shrink(a) := (x=x*a;y=y*a;z=z*a;); // if you want to keep track of the last argument value within Point set a=a
+    shrink(a) := (x:=x*a;y:=y*a;z:=z*a;); //to keep track of the last argument value within Point, also set a=a
     new
 };
 A = Point(0,0,1);
@@ -208,7 +218,7 @@ print(A.norm squared); //1
 </code></pre>
 
 
-		<p>Polymorphism of method-like expressions is automatically supported by declaring new methods with different numbers of arguments. For example:</p>
+		<p>Polymorphism of method-like expressions can be achieved by declaring new methods with different numbers of arguments. For example:</p>
 
 <pre><code class="language-cpp">Point(x,y,z) := {new};
 Point(x,y) := Point(x,y,0);
@@ -223,55 +233,36 @@ print(A.norm squared); //2
         <section id="scope-access">
           <h4>Scope access</h4>
           
-		<p>Scope access in NS is a fundamental concept that allows you to interact with and manipulate scopes and their variables. NS provides several methods for accessing and modifying scopes, which can be powerful but also require a good understanding of the language's rules. The dot operator (.) is one way to access and modify variables within a scope. When you use a.b, it implies that you want to run the scope b within the scope represented by a. Here's an example of using the dot operator:</p>
+		<p>Scope access in NS is a fundamental concept that allows you to interact with and manipulate scopes after their creation. Scope access can be performed with the operator :, or via supporting get and set methods. When you use a:b, it implies that you want to run the scope b within the scope represented by a. Here's an example of accessing a scope:</p>
 		
 <pre><code class="language-cpp">point = {
-	x=1;
-	y=2;
+	x:=1;
+	y:=2;
 	new
 };
-point.x = 5; // the same as point.(x=5);
-print(point.x); //5
+point:x = 5; // the same as point.(x=5);
+print(point:x); //5
 
-point.(x=1; y=1;);
+point:(x=1; y=1;);
 print(point.x); //1
 print(point.y); //1
 
-derived = point.{y=6;new}; //super of derived is the point
-print(derived.x); //1
-print(derived.y); //6
-print(derived.super.x); //1</code></pre>
+derived = point:{y=6;new}; //super of derived is the point
+print(derived:x); //1
+print(derived:y); //6
+print(derived:super:x); //1</code></pre>
 		
-		<p>In the above scenarios, it is clear whose scope variables are used. It is also clear where they are written.  When there are conflicts, NS provides accessors that let you to specify how scope access affects variable retrieval. In addition to the dot operator, which creates an error in conflicts. Fallback (:) is the best accessor. It allows the accessor scope to affect the scope being entered. It means that when you access a variable, the accessor scope can influence which variable is retrieved. Here is an example:</p>
+		<p>In the above scenarios, it is clear whose scope's variables are used to compute expressions. When the same expressions (including variable names) can be found both the scope being entered and the scope requesting access, the former's are used. The scope requesting access is stored in the `surface` variable. Here is an example:</p>
 		
-<pre><code class="language-cpp">x = 1;
-a = {
-	x = 0;
-	new
-};
-try(print(a.x)); //this will catch the created error
-</code></pre>
-
-		<p>Failback (#) is the best for assignment. This forces all variables to be retrieved from the accessor scope or its superscopes. It doesn't let the accessor scope affect the one being entered. It's used when you want to treat scopes as simple objects from which to read or write. Here is an example:</p>
-		
-<pre><code class="language-cpp">x = 1;
-a = {
-	x = 0;
+<pre><code class="language-cpp">x := 1;
+a := {
+	x := 0;
 	new
 };
 print(a:x); //0
-a#x = x;
+a:x=surface:x;  //equivalent to a:(x=surface:x);
 print(a:x); //1
 </code></pre>
-
-		<div class="alert alert-info" role="alert">
-			Accessors clarify which scope decides how expressions are evaluated.
-		</div>
-		
-		<div class="alert alert-info" role="alert">
-			The symbols =, :=, ., #, : have the same priority and the leftmost one is applied first.
-		</div>
-		
 		
 	<p>As a more complicated example shows how to override a formula using the fallback operation;, it stores a <it>base</it> scope that helps define a new version of the inequality formula in the scope <it>stricter</it> by fallbacking to the base during its implementation.</p>
 
@@ -468,23 +459,52 @@ print(utils:sqr(2)); // 4
 		
         <section id="list">
           <h4>list.ns</h4>
-          <p>This scope file creates lists from scopes.</p>
+          <p>This scope file lets you define lists, access element values via natural number identifiers, and set their element values. It also defines a for each loop. Internally, lists are lambda scopes and can be used as such (their elements are computed sequentially, and their last element is yielded as output). You can set any value to elements, including other lambda scopes, such as other lists.</p>
 		  
 		  
 		  <pre><code class="language-cpp">list = {run('list.ns')};
 		  
-x = list:list{'a';'b';'c'}; // list with three elements
-print(list:size(x)); // 3
-y = list:x[0]; // enter the scope to access its defined expressions
-print(list:x[0]); // a
-list:x[0] ~ 1024; // set list element
-print(list:x[0]); // 1024
-print(x); // the last element of the list
-list: for each i in x do {print(i);}; // 1024  b  c
+list: {  
+	x = list{'a';'b';'c'}; // list with three elements
+	print(size(x)); // 3
+	y = x[0]; // enter the scope to access its defined expressions
+	print(x[0]); // a
+	x[0] ~ 1024; // set list element
+	print(x[0]); // 1024
+	print(x); // the last element of the list
+	for each i in x do {print(i);}; // 1024  b  c
+}
+</code></pre>
+
+		
+		<div class="alert alert-info" role="alert">
+			Use the nums scope for fast array computations.
+		</div>
+
+
+		</section>
+		
+		
+        <section id="dict">
+          <h4>dict.ns</h4>
+          <p>This scope file lets you define dictionaries with hashable keys.</p>
+		  
+		  
+		  <pre><code class="language-cpp">list = {run('list.ns')};
+		  
+list: {  
+	x = list{'a';'b';'c'}; // list with three elements
+	print(size(x)); // 3
+	y = x[0]; // enter the scope to access its defined expressions
+	print(x[0]); // a
+	x[0] ~ 1024; // set list element
+	print(x[0]); // 1024
+	print(x); // the last element of the list
+	for each i in x do {print(i);}; // 1024  b  c
+}
 </code></pre>
 
 		</section>
-
 
     </main>
   </div>

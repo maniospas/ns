@@ -9,18 +9,17 @@ Access::~Access() {
 }
 
 const std::string Access::name() const {
-    return object_->name()+"."+name_->name();
+    std::string ret("");
+    if(object_!=nullptr)
+        ret += object_->name();
+    ret += ".";
+    if(name_!=nullptr)
+        ret += name_->name();
+    return ret;
 }
 
 std::shared_ptr<Object> Access::value(std::shared_ptr<Scope> scope) {
     auto object = object_->value(scope);
-    std::shared_ptr<Scope> entered = std::dynamic_pointer_cast<Scope>(object);
-    auto enchanced = std::make_shared<Scope>(entered, 
-                                             entered,
-                                             std::shared_ptr<Scope>(nullptr),
-                                             std::shared_ptr<Scope>(nullptr),
-                                             scope,// scope is the fallfront
-                                             std::shared_ptr<Scope>(nullptr)); 
-    
-    return name_->value(enchanced);
+    std::shared_ptr<Scope> entered = std::make_shared<Scope>(object, object, scope);
+    return exists(name_, "accessing expression")->value(entered);
 }

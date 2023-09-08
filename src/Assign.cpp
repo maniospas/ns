@@ -8,13 +8,19 @@ Assign::~Assign() {
 }
 
 const std::string Assign::name() const {
-    return name_->name()+"="+object_->name();
+    std::string ret("");
+    if(name_!=nullptr)
+        ret += name_->name();
+    ret += "=";
+    if(object_!=nullptr)
+        ret += object_->name();
+    return ret;
 }
 
 std::shared_ptr<Object> Assign::value(std::shared_ptr<Scope> scope) {
     push();
     auto key = name_;//->value(scope);
-    auto value = exists(object_->value(scope));
+    auto value = exists(exists(object_, "assignment expression ")->value(scope), "assignment name");
     scope->set(key->assignment_name(), value);
     return pop(value);
 }

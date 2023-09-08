@@ -12,7 +12,7 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "src/*.cpp",
                 "-Ilib",
-                "-O3"
+                "-O0"
             ],
             "options": {
                 "cwd": "${fileDirname}"

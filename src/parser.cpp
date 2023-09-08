@@ -3,7 +3,6 @@
 #include <iostream>
 #include <memory>
 #include "parser.h"
-#include "Variable.h"
 #include "Scope.h"
 #include "Number.h"
 #include "Sequence.h"
@@ -11,8 +10,6 @@
 #include "Scoped.h"
 #include "Unscoped.h"
 #include "Access.h"
-#include "Edit.h"
-#include "Fallfront.h"
 #include "String.h"
 #include "Expression.h"
 #include "PredicatePart.h"
@@ -21,10 +18,13 @@
 
 bool is_number_convertible(std::string predicate) {
     int digits = predicate.length();
+    int countDigits = 0;
     for(int i=0;i<digits;i++)
         if(!isdigit(predicate[i]) && predicate[i]!='.')
             return false;
-    return digits;
+        else if(predicate[i]!='.')
+            countDigits += 1;
+    return countDigits;
 }
 
 
@@ -146,7 +146,7 @@ std::vector<std::string> tokenize(const std::string& source) {
             merged_tokens.push_back(token);
             i += 2;
         }
-        else if(token.length()==1 && next_token.length()==1 && token!=" " && !isalpha(token[0]) && !isdigit(token[1]) && next_token=="=") {
+        else if(token.length()==1 && next_token.length()==1 && token!=" " && !isalpha(token[0]) && !isdigit(token[1]) && token!=")" && token!="}" && next_token=="=") {
             merged_tokens.push_back(token+next_token);
             i += 2;
         }
@@ -252,35 +252,36 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
             depth -= 1;
         if(depth)
             continue;
+        // all the following for zero depth only (otherwise they are nestsed)
         if(tokens[i]==":=")
             return std::make_shared<Callable>(predicate_parts(tokens, from, i-1), parse(tokens, i+1, to));
-        if(tokens[i]=="=")
-            return std::make_shared<Assign>(parse(tokens, from, i-1), parse(tokens, i+1, to));
-        if(tokens[i]==".") {
+        //if(tokens[i]=="=")
+        //    return std::make_shared<Assign>(parse(tokens, from, i-1), parse(tokens, i+1, to));
+        //if(tokens[i]==".") 
+        //    pos_access = i;
+        if(tokens[i]==":") {
             pos_access = i;
             if(pos_access!=-1)
                 return std::make_shared<Access>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
         }
-        if(tokens[i]==":") {
+        /*if(tokens[i]=="#") {
             pos_access = i;
             if(pos_access!=-1)
-                return std::make_shared<Edit>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
-        }
-        if(tokens[i]=="#") {
-            pos_access = i;
-            if(pos_access!=-1)
-                return std::make_shared<Fallfront>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
-        }
+                return std::make_shared<Access>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
+        }*/
     }
 
-    // convert to variable if only one token remaining
+    //if(pos_access!=-1)  // only for "."
+    //    return std::make_shared<Access>(parse(tokens, from, pos_access-1), parse(tokens, pos_access+1, to));
+        
+
+    // try to convert to primitive if only one token remaining
     if(from==to) {
         if(tokens[from][0]=='\'' && tokens[from][tokens[from].length()-1]=='\'') {
             return std::make_shared<String>(tokens[from].substr(1, tokens[from].length()-2));
         }
         if(is_number_convertible(tokens[from]))
             return std::make_shared<Number>(std::stof(tokens[from]));
-        //return std::make_shared<Variable>(tokens[from]);
     }
     auto parts = predicate_parts(tokens, from, to);
     return std::make_shared<Expression>(parts);
