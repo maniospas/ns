@@ -1,0 +1,7 @@
+run('nslang/flow.cpp');    // conditions and loops
+run('nslang/io.cpp');      // console print and read
+run('nslang/math.cpp');    // numeric expressions (addition, multiplication, etc)
+run('nslang/meta.cpp');    // metaprogramming
+run('nslang/commons.ns');  // assignment, object access (based on metaprogramming)
+run('nslang/list.ns');     // list definitions based on metaprogramming
+new

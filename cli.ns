@@ -1,4 +1,4 @@
-run('language/all.ns');
+run('nslang/all.ns');
 print('-----------------------------------------------');
 print('          NS command line interface');
 print('    Author: Emmanouil (Manios) Krasanakis');
