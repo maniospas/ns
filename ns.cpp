@@ -9,7 +9,7 @@
 #include "Scope.h"
 #include "CustomPredicateExecutor.h"
 #include "Number.h"
-#include "String.h"
+#include "PString.h"
 #include "Unscoped.h"
 
 
@@ -18,30 +18,6 @@ bool ends_with(std::string const &str, std::string const &suffix) {
         return false;
     return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
 }
-
-
-class PrintExecutor: public CustomPredicateExecutor {
-    public:
-        PrintExecutor(): CustomPredicateExecutor("print(text)") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            auto text = exists(scope->get("text"), "text");
-            std::cout << text->name() << std::endl;
-            return text;
-        }
-};
-
-class InputExecutor: public CustomPredicateExecutor {
-    public:
-        InputExecutor(): CustomPredicateExecutor("read(prompt)") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::cout << exists(scope->get("prompt"), "prompt")->name();
-            std::string input;
-            std::getline(std::cin, input);
-            return std::make_shared<String>(input);
-        }
-};
 
 class DetachExecutor: public CustomPredicateExecutor {
     public:
@@ -54,102 +30,6 @@ class DetachExecutor: public CustomPredicateExecutor {
             auto ret = exists(scope->get("nspopfield"), "nspopfield");
             scope->set(ret->name(), std::shared_ptr<Object>(nullptr));
             return ret;
-        }
-};
-
-
-class AddExecutor: public CustomPredicateExecutor {
-    public:
-        AddExecutor(): CustomPredicateExecutor("(a)+(b)") {
-            priority = 4;
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            return std::make_shared<Number>(a+b);
-        }
-};
-
-class SubExecutor: public CustomPredicateExecutor {
-    public:
-        SubExecutor(): CustomPredicateExecutor("(a)-(b)") {
-            priority = 3;
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            return std::make_shared<Number>(a-b);
-        }
-};
-
-class MulExecutor: public CustomPredicateExecutor {
-    public:
-        MulExecutor(): CustomPredicateExecutor("(a)*(b)") {
-            priority = 2;
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            return std::make_shared<Number>(a*b);
-        }
-};
-
-class DivExecutor: public CustomPredicateExecutor {
-    public:
-        DivExecutor(): CustomPredicateExecutor("(a)/(b)") {
-            priority = 1;
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            if(b==0)
-                error("Division by zero");
-            return std::make_shared<Number>(a/b);
-        }
-};
-
-
-class LessExecutor: public CustomPredicateExecutor {
-    public:
-        LessExecutor(): CustomPredicateExecutor("(a)<(b)") {
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            return std::make_shared<Number>(a<b);
-        }
-};
-
-class LessEqExecutor: public CustomPredicateExecutor {
-    public:
-        LessEqExecutor(): CustomPredicateExecutor("(a)<=(b)") {
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            return std::make_shared<Number>(a<=b);
-        }
-};
-
-class GreaterExecutor: public CustomPredicateExecutor {
-    public:
-        GreaterExecutor(): CustomPredicateExecutor("(a)>(b)") {
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            return std::make_shared<Number>(a>b);
-        }
-};
-
-class GreaterEqExecutor: public CustomPredicateExecutor {
-    public:
-        GreaterEqExecutor(): CustomPredicateExecutor("(a)>=(b)") {
-        }
-        virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
-            return std::make_shared<Number>(a>=b);
         }
 };
 
@@ -170,124 +50,15 @@ class IsExecutor: public CustomPredicateExecutor {
         }
 };
 
-class IfExecutor: public CustomPredicateExecutor {
-    public:
-        IfExecutor(): CustomPredicateExecutor("if((nscondition))((nssuccess))") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> condition = scope->get("nscondition");
-            std::shared_ptr<Object> block = scope->get("nssuccess");
-            auto number = std::dynamic_pointer_cast<Number>(exists(condition->value(scope), "nscondition value"));
-            if(number!=nullptr && number->value())
-                return block->value(scope);
-            return std::shared_ptr<Object>(nullptr);
-        }
-};
+
+/*#include <restbed.hpp>
 
 
-class IfElseExecutor: public CustomPredicateExecutor {
-    public:
-        IfElseExecutor(): CustomPredicateExecutor("if((nscondition))((nssuccess))else((nsfailure))") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> condition = scope->get("nscondition");
-            std::shared_ptr<Object> block = scope->get("nssuccess");
-            std::shared_ptr<Object> alternative = scope->get("nsfailure");
-            auto number = std::dynamic_pointer_cast<Number>(exists(condition->value(scope)));
-            if(number!=nullptr && number->value())
-                return block->value(scope);
-            return alternative->value(scope);
-        }
-};
-
-
-class WhileExecutor: public CustomPredicateExecutor {
-    public:
-        WhileExecutor(): CustomPredicateExecutor("while((nscondition))((nsloop))") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> ret = std::shared_ptr<Object>(nullptr);
-            auto condition = scope->get("nscondition");
-            auto loop = scope->get("nsloop");
-            while(true) {
-                auto number = std::dynamic_pointer_cast<Number>(condition->value(scope));
-                if(number==nullptr || !number->value())
-                    break;
-                ret = loop->value(scope);
-            }
-            return ret;
-        }
-};
-
-
-
-class SizeExecutor: public CustomPredicateExecutor {
-    public:
-        SizeExecutor(): CustomPredicateExecutor("size(nsblock)") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> block = exists(scope->get("nsblock"), "nsblock");
-            return std::make_shared<Number>(block->size());
-        }
-};
-
-class GetExecutor: public CustomPredicateExecutor {
-    public:
-        GetExecutor(): CustomPredicateExecutor("get(nsblock)(nsindex)") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> block = exists(scope->get("nsblock"), "nsblock");
-            std::shared_ptr<Object> i_obj = exists(scope->get("nsindex"), "nsindex");
-            auto i = std::dynamic_pointer_cast<Number>(i_obj);
-            if(i!=nullptr)
-                return block->get((int)i->value());
-            if(std::dynamic_pointer_cast<Unscoped>(i_obj)!=nullptr)
-                i_obj = std::dynamic_pointer_cast<Unscoped>(i_obj)->contents();
-            return block->get(i_obj->name());
-            //exists(i, "nsindex is not a number (use nsblock:get(nsindex) instead)");
-        }
-};
-
-class SetExecutor: public CustomPredicateExecutor {
-    public:
-        SetExecutor(): CustomPredicateExecutor("set(nsblock)(nsindex)(nsvalue)") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> block = exists(scope->get("nsblock"), "nsblock");
-            std::shared_ptr<Object> i_obj = exists(scope->get("nsindex"), "nsindex");
-            std::shared_ptr<Object> value = scope->get("nsvalue");
-            auto i = std::dynamic_pointer_cast<Number>(i_obj);
-            exists(i, "nsindex not a number");
-            block->set((int)i->value(), value);
-            return value;
-        }
-};
-
-
-class SelfSetExecutor: public CustomPredicateExecutor {
-    public:
-        SelfSetExecutor(): CustomPredicateExecutor("set(nsname)(nsvalue)") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> name = exists(scope->get("nsname"), "nsname");
-            std::shared_ptr<Object> value = scope->get("nsvalue");
-            scope->set(name->name(), value);
-            return value;
-        }
-};
-
-
-class SelfGetExecutor: public CustomPredicateExecutor {
-    public:
-        SelfGetExecutor(): CustomPredicateExecutor("get(nsname)") {
-        }
-        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> name = exists(scope->get("nsname"), "nsname");
-            return scope->get(name->name());
-        }
-};
-
-
+void helloWorldHandler(const std::shared_ptr<restbed::Session> session) {
+    const auto request = session->get_request();
+    std::string response_body = "Hello, World!";
+    session->close(restbed::OK, response_body, {{"Content-Length", std::to_string(response_body.length())}});
+}*/
 
 
 std::string readfile(std::string path) {
@@ -296,6 +67,68 @@ std::string readfile(std::string path) {
     return str;
 }
 
+/*std::shared_ptr<Object> run_dll(std::string& name, std::shared_ptr<Scope> scope){
+    return scope;
+}
+*/
+
+
+#ifdef _WIN32
+#include <Windows.h>
+typedef std::shared_ptr<Object> (*DLL_run)(std::shared_ptr<Scope>);
+
+std::shared_ptr<Object> run_dll(std::string& name, std::shared_ptr<Scope> scope) {
+    int requiredSize = MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, nullptr, 0);
+    if (requiredSize == 0) 
+        error("Error in MultiByteToWideChar");
+    wchar_t* wideDllPath = new wchar_t[requiredSize];
+    if (MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, wideDllPath, requiredSize) == 0) {
+        delete[] wideDllPath;
+        error("Error in MultiByteToWideChar");
+    }
+    HMODULE hDLL = LoadLibraryW(wideDllPath);
+    if (hDLL == NULL) 
+        error("Failed to load "+name);
+    DLL_run run = (DLL_run)GetProcAddress(hDLL, "run");
+    return run(scope);
+}
+
+bool file_exists(const char *fileName) {
+    std::ifstream infile(fileName);
+    return infile.good();
+}
+
+#include<filesystem>
+
+std::shared_ptr<Object> run_cpp(std::string& name_, std::shared_ptr<Scope> scope) {
+    std::string name = std::filesystem::current_path().string()+"/"+name_;
+    std::string compiled = name.substr(0, name.length()-4)+".dll";
+    if(!file_exists(compiled.c_str())) {
+        std::cout << "Please wait while "+compiled << " is compiled for the first time\n";
+        auto compiler_object = scope->get("nscompiler");
+        std::string command = compiler_object==nullptr?"g++":compiler_object->name();
+        command += " -shared -g \""+name+"\" -o \""+compiled+"\" src/*.cpp -Ilib -O3";
+        //std::cout << command<<"\n";
+        std::system(command.c_str());
+    }
+    if(!file_exists(compiled.c_str())) 
+        error("Compilation failure");
+    return run_dll(compiled, scope);
+}
+
+
+#else
+#include <dlfcn.h>
+typedef std::shared_ptr<Object> (*DLL_run)(std::shared_ptr<Scope>);
+
+std::shared_ptr<Object> run_dll(std::string& name, std::shared_ptr<Scope> scope) {
+    void* hDLL = dlopen(name, RTLD_LAZY);
+    if (hDLL == NULL) 
+        error("Failed to load "+name);
+    DLL_run run = (DLL_run)dlsym(libraryHandle, "run");
+    return run(scope);
+}
+#endif
 
 class LoadExecutor: public CustomPredicateExecutor {
     public:
@@ -312,6 +145,10 @@ class LoadExecutor: public CustomPredicateExecutor {
                 std::shared_ptr<Object> obj = exists(scope->get("nspath"), "nspath");
                 if(std::dynamic_pointer_cast<String>(obj)!=nullptr) {
                     std::string source = obj->name();
+                    if(ends_with(source, ".dll") || ends_with(source, ".so") || ends_with(source, ".dylib")) 
+                        return run_dll(source, scope);
+                    if(ends_with(source, ".cpp"))
+                        return run_cpp(source, scope);
                     if(ends_with(source, ".ns"))
                         source = readfile(source);
                     obj = exists(parse(source), "failed to parse file contents");
@@ -351,7 +188,6 @@ class TryExecutor: public CustomPredicateExecutor {
 };
 
 
-
 class TryCatchExecutor: public CustomPredicateExecutor {
     public:
         TryCatchExecutor(): CustomPredicateExecutor("try((nssource))((nsexcept))") {
@@ -385,29 +221,12 @@ int main(int argc, char *argv[]) {
     auto global = std::make_shared<Scope>(std::shared_ptr<Object>(nullptr), 
                                             std::shared_ptr<Object>(nullptr), 
                                             std::shared_ptr<Object>(nullptr));
-    global->load(std::make_shared<PrintExecutor>());
-    global->load(std::make_shared<InputExecutor>());
     global->load(std::make_shared<DetachExecutor>());
-    global->load(std::make_shared<AddExecutor>());
-    global->load(std::make_shared<MulExecutor>());
-    global->load(std::make_shared<SubExecutor>());
-    global->load(std::make_shared<DivExecutor>());
-    global->load(std::make_shared<IfExecutor>());
-    global->load(std::make_shared<IfElseExecutor>());
-    global->load(std::make_shared<WhileExecutor>());
-    global->load(std::make_shared<LessExecutor>());
-    global->load(std::make_shared<LessEqExecutor>());
-    global->load(std::make_shared<GreaterExecutor>());
-    global->load(std::make_shared<GreaterEqExecutor>());
     global->load(std::make_shared<LoadExecutor>());
     global->load(std::make_shared<TryExecutor>());
     global->load(std::make_shared<TryCatchExecutor>());
-    global->load(std::make_shared<SizeExecutor>());
-    global->load(std::make_shared<GetExecutor>());
-    global->load(std::make_shared<SetExecutor>());
-    global->load(std::make_shared<SelfSetExecutor>());
-    global->load(std::make_shared<SelfGetExecutor>());
     global->load(std::make_shared<IsExecutor>());
+
     auto program = parse(source);
     //std::cout << program->name() << std::endl;
     program->value(global);

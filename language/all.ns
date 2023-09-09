@@ -1,0 +1,7 @@
+run('language/flow.cpp');    // conditions and loops
+run('language/io.cpp');      // console print and read
+run('language/math.cpp');    // numeric expressions (addition, multiplication, etc)
+run('language/meta.cpp');    // metaprogramming
+run('language/commons.ns');  // assignment, object access (based on metaprogramming)
+run('language/list.ns');     // list definitions based on metaprogramming
+new

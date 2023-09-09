@@ -1,9 +1,9 @@
 {
     "tasks": [
         {
-            "type": "cppbuild",
+            "type": "shell",
             "label": "C/C++: g++.exe build active file",
-            "command": "C:\\Strawberry\\c\\bin\\g++.exe",
+            "command": "g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
@@ -12,7 +12,7 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "src/*.cpp",
                 "-Ilib",
-                "-O0"
+                "-O3"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -20,11 +20,24 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
             "detail": "Build exe."
+        },
+        {
+            "label": "Build DLL",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-shared",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.dll",
+                "${fileDirname}\\${fileBasenameNoExtension}.cpp",
+                "src/*.cpp",
+                "-Ilib",
+                "-O3"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ],
     "version": "2.0.0"

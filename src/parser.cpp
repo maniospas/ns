@@ -10,7 +10,7 @@
 #include "Scoped.h"
 #include "Unscoped.h"
 #include "Access.h"
-#include "String.h"
+#include "PString.h"
 #include "Expression.h"
 #include "PredicatePart.h"
 #include "CustomPredicateExecutor.h"

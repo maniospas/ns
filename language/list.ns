@@ -1,0 +1,35 @@
+list((data)) := {
+	class='list';
+	data=data;
+	size:=size(data);
+	iter:=iter(data);
+	new
+};
+(list:(try(class, 0)) is 'list')[(index)] := get(list:data, index);
+(list:(try(class, 0)) is 'list')[(index)]~(value) := {set(list:data,index,value)};
+
+iter(list:(try(class, 0)) is 'list') := {
+	i = 0;
+	next := (
+		condition = (i<size(list:data));
+		if(condition) (
+			position = i;
+			value = list[i];
+			i = i+1;
+		) else {0};
+		condition
+	);
+	new
+};
+
+for each ((symbol)) in (list:(try(class, 0)) is 'list') do ((body)) := (
+	iterator = iter(list);
+	while(iterator:next) (
+		set(symbol, iterator:value);
+		result = run(body);
+	);
+	pop(iterator);
+	pop(result)
+);
+
+new

@@ -10,9 +10,9 @@ class Scope;
 class Object: public std::enable_shared_from_this<Object> {
     protected:
         void push();
+        std::shared_ptr<Object> pop(std::shared_ptr<Object> object);
         std::shared_ptr<Object> exists(std::shared_ptr<Object> object);
         std::shared_ptr<Object> exists(std::shared_ptr<Object> object, const std::string& explanation);
-        std::shared_ptr<Object> pop(std::shared_ptr<Object> object);
     public:
         Object();
         virtual const std::string type() const = 0;
@@ -30,7 +30,6 @@ class Object: public std::enable_shared_from_this<Object> {
         virtual void set(int i, std::shared_ptr<Object> value);
         virtual std::shared_ptr<Object> get(int i);
         virtual int size();
-
 };
 
 #endif // OBJECT_H

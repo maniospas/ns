@@ -1,3 +1,4 @@
+run('language/all.ns');
 print('-----------------------------------------------');
 print('          NS command line interface');
 print('    Author: Emmanouil (Manios) Krasanakis');
@@ -9,7 +10,6 @@ print('  Instructions');
 print('    Write code in each line to execute.');
 print('    Write exit to terminate.');
 print('-----------------------------------------------');
-try(run('commons.ns'));
 cli:=1;
 exit := (cli:=0;print(new);'NS command line terminated.');
 output := ( // allow self-modification
