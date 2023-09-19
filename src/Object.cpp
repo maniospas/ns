@@ -22,14 +22,18 @@ void Object::push() {
 }
 
 std::shared_ptr<Object> Object::exists(std::shared_ptr<Object> object) {
-    if(object==nullptr)
+    if(object==nullptr) {
+        unlock();
         error("Expression does not exist");
+    }
     return object;
 }
 
 std::shared_ptr<Object> Object::exists(std::shared_ptr<Object> object, const std::string& explanation) {
-    if(object==nullptr)
+    if(object==nullptr) {
+        unlock();
         error("Expression does not exist: "+explanation);
+    }
     return object;
 }
 
@@ -37,6 +41,17 @@ std::shared_ptr<Object> Object::pop(std::shared_ptr<Object> object) {
     auto ret = exists(object);
     stack.pop_back();
     return ret;
+}
+
+
+void Object::exit_stack(int from) {
+    int pos = 0;
+    for (auto obj : stack) {
+        /*if(pos<from) 
+            pos += 1;
+        else*/
+            obj->unlock();
+    }
 }
 
 

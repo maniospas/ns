@@ -31,7 +31,7 @@ class IfElseExecutor: public CustomPredicateExecutor {
             std::shared_ptr<Object> condition = scope->get("nscondition");
             std::shared_ptr<Object> block = scope->get("nssuccess");
             std::shared_ptr<Object> alternative = scope->get("nsfailure");
-            auto number = std::dynamic_pointer_cast<Number>(exists(condition->value(scope)));
+            auto number = std::dynamic_pointer_cast<Number>(exists(condition->value(scope), "nscondition value"));
             if(number!=nullptr && number->value())
                 return block->value(scope);
             return alternative->value(scope);

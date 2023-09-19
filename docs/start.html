@@ -31,7 +31,7 @@
 
 <div class="container mt-4">
 	<div class="jumbotron">
-		<h1 class="display-4">Get started with NS</h1>
+		<h1 class="display-4">Get started with NS and NSLang</h1>
 	</div>
 	
 	<div class="container mt-3">
@@ -40,19 +40,19 @@
 			<div class="card">
 				<div class="card-body">
 					<h2 class="card-title">NSLang</h2>
-					<p class="card-text">NS lets you declare and run expressions with programmatic or precompiled C++ implementations. <b>NSLang</b> is a language built on top of NS by declaring additional expressions. Here's a usage example:</p>
+					<p class="card-text">NS lets you declare and run expressions with programmatic or precompiled C++ implementations. <b>NSLang</b> is a language built on top of NS by <a href="syntax.html#nslang">adding expressions</a>. Here's an example of its code:</p>
 					
 					<pre><code class="language-cpp">run('nslang/all.ns');	
-// Print declared by NSLang.
+//Print declared by NSLang
 print('Hello world!');
-// = declared by NSLang.
-i = 0;
-// Loops and arithmetics
-// declared by NSLang.
-// The condition scope's
-// last value is checked.
-while(i=i+1;i<=10) {
-	print(i); // 1,2,...,10
+</code></pre>
+Conditions, loops, arithmetics, and =
+are declared by NSLang. Conditions are
+scopes that are evaluate to their
+last expression's outcome.
+<pre><code class="language-cpp">while(i=i+1;i<=10) {
+	i = 0;
+	print(i); //1,2,...,10
 };
 </code></pre>
 				</div>
@@ -62,7 +62,7 @@ while(i=i+1;i<=10) {
 			<div class="card">
 				<div class="card-body">
 					<h2 class="card-title">Scopes</h2>
-					<p class="card-text">Use a brackets to prevent any assignment from leaking to enclosing superscopes. Parentheses declare scopes that just run code. Do not put a semicolon after the last expression to make it the scope's returned value.</p>
+					<p class="card-text">Use a brackets to prevent any assignment or declaration from leaking to enclosing superscopes. Parentheses declare scopes that just run code. Do not put a semicolon after the last expression to make it the scope's returned value.</p>
 					<pre><code class="language-cpp">x = 0;
 y = {x = x+2; x*x};
 print(x); //0
@@ -78,7 +78,7 @@ print(y.z); //1</code></pre>
 			<div class="card">
 				<div class="card-body">
 					<h2 class="card-title">Expressions</h2>
-					<p class="card-text">Create expressions with :=. These can have any placement of variables between predicates. Enclose arguments in parentheses.</p>
+					<p class="card-text">Declare NS expressions with signature := implementation. The signature can have any placement of variables (in parentheses) between predicates.</p>
 					<pre><code class="language-cpp">add(x,y) := {x+y};
 sub (z) from (x,y) := {x+y-z};
 Point(x,y) := { //views x,y
@@ -88,7 +88,7 @@ Point(x,y) := { //views x,y
 print(add(1,2)); //3
 print(sub (3) from (1,2)); //0
 print(Point(1,2).x); //1 
-print(Point(1,2):el sum); //3
+print(Point(1,2).el sum); //3
 </code></pre>
 				</div>
 			</div>
@@ -97,19 +97,19 @@ print(Point(1,2):el sum); //3
 		<div class="col-md-3">
 			<div class="card">
 				<div class="card-body">
-					<h2 class="card-title">Self-modification</h2>
+					<h2 class="card-title">Overloading</h2>
 		
-					<p class="card-text">The colon enters a scope. It uses the scope from where it is called as a fallback variable getter. Override any formula like so.</p>
-					<pre><code class="language-cpp">system = new; // keep system
-stricter = {
-  (x)<(y) := {
-    system: ( //in system
-      (x)<((y)-(1))
-    ) 
-  };
-  new
+					<p class="card-text">The NS colon operator (the dot is defined by NSLang) enters a scope. It uses the scope from where it is called as a fallback variable getter. Override any formula like so.</p>
+					<pre><code class="language-cpp">P(x,y,z) := {
+	norm sq:=x*x+y*y+z*z;
+	new
 };
-print(stricter:(1)<(2)); //modified
+P(x,y) := P(x,y,0);
+P(x:new<0,y) := P(0,y);
+p1 = P(1,1);
+p2 = P(-1,1);
+print(p1.norm sq); //2
+print(p2.norm sq); //1
 </pre></code>
 				</div>
 			</div>

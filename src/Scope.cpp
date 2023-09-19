@@ -9,35 +9,51 @@ Scope::Scope(const std::shared_ptr<Object> super_,
     const std::shared_ptr<Object> new_,
     const std::shared_ptr<Object> surface_
     ) {
-    values["super"] = super_;
-    values["new"] = new_;
-    values["surface"] = surface_;
+    //if(super_!=nullptr)
+        values["super"] = super_;
+    //if(new_!=nullptr)
+        values["new"] = new_;
+    //if(surface_!=nullptr)
+        values["ext"] = surface_;
 }
 
 Scope::~Scope() {
 }
 
 void Scope::gather_executors(std::map<std::string, std::shared_ptr<CustomPredicateExecutor>>& executors) {
-    auto surfacescope = values["surface"];
-    if(surfacescope!=nullptr && std::dynamic_pointer_cast<Scope>(surfacescope)!=nullptr)
-        std::dynamic_pointer_cast<Scope>(surfacescope)->gather_executors(executors);
     std::shared_ptr<CustomPredicateExecutor> casted;
     for(auto it=values.begin();it!=values.end();++it) 
         if(it->second!=nullptr 
         && (casted=std::dynamic_pointer_cast<CustomPredicateExecutor>(it->second))!=nullptr
         && executors.find(it->first)==executors.end())
             executors[it->first] = casted;
+    /*
+    auto surfacescope = values["ext"];
+    if(surfacescope!=nullptr && std::dynamic_pointer_cast<Scope>(surfacescope)!=nullptr)
+        std::dynamic_pointer_cast<Scope>(surfacescope)->gather_executors(executors);
+    */
+    
     auto superscope = values["super"];
     if(superscope!=nullptr && std::dynamic_pointer_cast<Scope>(superscope)!=nullptr)
         std::dynamic_pointer_cast<Scope>(superscope)->gather_executors(executors);
 }
 
 
+void Scope::conclude_threads() {
+    // need to also conclude superthreads, because members can be accessed from there
+    /*auto superscope = values["super"];
+    if(superscope!=nullptr && std::dynamic_pointer_cast<Scope>(superscope)!=nullptr)
+        std::dynamic_pointer_cast<Scope>(superscope)->conclude_threads();*/
+   
+    lock_threads();
+    for(const auto& thread : threads)
+        pthread_join(*thread->value(), NULL);
+    threads.clear();
+    unlock_threads();
+}
+
+
 void Scope::gather_overloads(const std::string& signature, std::vector<std::shared_ptr<CustomPredicateExecutor>>& overloads) {
-    auto surfacescope = values["surface"];
-    if(surfacescope!=nullptr && std::dynamic_pointer_cast<Scope>(surfacescope)!=nullptr)
-        std::dynamic_pointer_cast<Scope>(surfacescope)->gather_overloads(signature, overloads);
-    
     std::shared_ptr<CustomPredicateExecutor> casted;
     auto it = overloaded.find(signature);
     if(it!=overloaded.end()) {
@@ -50,6 +66,11 @@ void Scope::gather_overloads(const std::string& signature, std::vector<std::shar
                 //N++;
             }
     }
+    /*
+    auto surfacescope = values["ext"];
+    if(surfacescope!=nullptr && std::dynamic_pointer_cast<Scope>(surfacescope)!=nullptr)
+        std::dynamic_pointer_cast<Scope>(surfacescope)->gather_overloads(signature, overloads);
+    */
 
     auto superscope = values["super"];
     if(superscope!=nullptr && std::dynamic_pointer_cast<Scope>(superscope)!=nullptr)
@@ -77,7 +98,7 @@ void Scope::set(const std::string& name, const std::shared_ptr<Object> value) {
 }
 
 std::shared_ptr<Object> Scope::get(const std::string& name) {
-    /*auto surface_ = values.find("surface");
+    /*auto surface_ = values.find("ext");
     if(surface_!=values.end() && surface_->second!=nullptr)
     {
         std::shared_ptr<Object> ret = surface_->second->get(name);
@@ -89,12 +110,12 @@ std::shared_ptr<Object> Scope::get(const std::string& name) {
     if(new_!=values.end() && new_->second!=nullptr) {
         return new_->second->get(name);
     }*/
-    if(name=="new")// && values["new"] == nullptr)
+    if(name=="new" && values["new"] == nullptr)
         return shared_from_this();
     if(name=="super" && values["super"]==values["new"] && values["super"]!=nullptr) 
         return values["super"]->get("super");
     auto it = values.find(name);
-    if(it==values.end()) {
+    if(it==values.end() || it->second==nullptr) {
         /*auto new_ = values.find("new");
         if(new_!=values.end() && new_->second!=nullptr && (ret=new_->second->get(name))!=nullptr)
             return ret;*/

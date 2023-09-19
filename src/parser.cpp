@@ -255,8 +255,8 @@ std::shared_ptr<Object> parse(std::vector<std::string>& tokens, int from, int to
         // all the following for zero depth only (otherwise they are nestsed)
         if(tokens[i]==":=")
             return std::make_shared<Callable>(predicate_parts(tokens, from, i-1), parse(tokens, i+1, to));
-        //if(tokens[i]=="=")
-        //    return std::make_shared<Assign>(parse(tokens, from, i-1), parse(tokens, i+1, to));
+        if(tokens[i]=="=")
+            return std::make_shared<Assign>(parse(tokens, from, i-1), parse(tokens, i+1, to));
         //if(tokens[i]==".") 
         //    pos_access = i;
         if(tokens[i]==":") {

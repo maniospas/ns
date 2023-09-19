@@ -5,10 +5,13 @@
 #include <ctype.h>
 #include <fstream>
 #include <streambuf>
+#include <filesystem>
+#include <pthread.h>
 #include "parser.h"
 #include "Scope.h"
 #include "CustomPredicateExecutor.h"
 #include "Number.h"
+#include "Thread.h"
 #include "PString.h"
 #include "Unscoped.h"
 
@@ -18,6 +21,62 @@ bool ends_with(std::string const &str, std::string const &suffix) {
         return false;
     return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
 }
+
+void* async_worker(void* arg) {
+    void** args = (void**)arg;
+    {
+        std::shared_ptr<Object> runnable = *((std::shared_ptr<Object>*)args[0]);
+        std::shared_ptr<Scope> scope = *((std::shared_ptr<Scope>*)args[1]);
+        std::shared_ptr<Thread> thread = *((std::shared_ptr<Thread>*)args[2]);
+
+        scope->lock_threads();
+        scope->threads.push_back(thread); // do not remove this here, it will be removed on accessing
+        scope->unlock_threads();
+
+        auto ret = runnable->value(scope);
+        if(ret==nullptr) 
+            error("async nsbody evaluates to None");
+        thread->result = ret;
+    }
+    delete (std::shared_ptr<Object>*)args[0];
+    delete (std::shared_ptr<Scope>*)args[1];
+    delete (std::shared_ptr<Thread>*)args[2];
+    delete[] args;
+    pthread_exit(NULL);
+    return NULL;
+}
+
+class AsyncExecutor: public CustomPredicateExecutor {
+    public:
+        AsyncExecutor(): CustomPredicateExecutor("async((nsbody))") {
+        }
+        std::shared_ptr<Scope> vscoped(std::shared_ptr<Scope> scope) {
+            return CustomPredicateExecutor::predicateScope;
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            auto ret = exists(scope->get("nsbody"), "nsbody");
+            void** args = new void*[3];
+            auto thread = std::make_shared<Thread>();
+            args[0] = new std::shared_ptr<Object>(ret);
+            args[1] = new std::shared_ptr<Scope>(scope);
+            args[2] = new std::shared_ptr<Thread>(thread);
+            pthread_create(thread->value(), NULL, async_worker, (void*)args);
+            return thread;
+        }
+};
+
+
+class JoinExecutor: public CustomPredicateExecutor {
+    public:
+        JoinExecutor(): CustomPredicateExecutor("join(nsthread)") {
+        }
+        std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
+            auto thread = std::dynamic_pointer_cast<Thread>(exists(scope->get("nsthread"), "nsthread"));
+            exists(thread, "is not a thread (create threads with async(...))");
+            pthread_join(*thread->value(), NULL);
+            return thread->result;
+        }
+}; 
 
 class DetachExecutor: public CustomPredicateExecutor {
     public:
@@ -98,8 +157,6 @@ bool file_exists(const char *fileName) {
     return infile.good();
 }
 
-#include<filesystem>
-
 std::shared_ptr<Object> run_cpp(std::string& name_, std::shared_ptr<Scope> scope) {
     std::string name = std::filesystem::current_path().string()+"/"+name_;
     std::string compiled = name.substr(0, name.length()-4)+".dll";
@@ -174,12 +231,14 @@ class TryExecutor: public CustomPredicateExecutor {
             std::list<std::shared_ptr<Object>> previous_stack(Object::stack);
             Object::stack.clear();
             try{
-                auto ret = exists(exists(scope->get("nssource"), "nssource")->value(scope));
+                auto ret = exists(exists(scope->get("nssource"), "nssource")->value(scope), "nssource value");
+                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 return ret;
             }
             catch (std::runtime_error& e) {
                 std::cout << e.what() << std::endl;
+                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 return std::make_shared<String>(e.what());
                 //return std::make_shared<Number>(0);
@@ -200,10 +259,12 @@ class TryCatchExecutor: public CustomPredicateExecutor {
             Object::stack.clear();
             try{
                 auto ret = exists(exists(scope->get("nssource"), "nssource")->value(scope), "nssource value");
+                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 return ret;
             }
             catch (std::runtime_error& e) {
+                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 auto except = exists(exists(scope->get("nsexcept"), "nsexcept")->value(scope), "nsexcept value");
                 return except;
@@ -226,6 +287,8 @@ int main(int argc, char *argv[]) {
     global->load(std::make_shared<TryExecutor>());
     global->load(std::make_shared<TryCatchExecutor>());
     global->load(std::make_shared<IsExecutor>());
+    global->load(std::make_shared<AsyncExecutor>());
+    global->load(std::make_shared<JoinExecutor>());
 
     auto program = parse(source);
     //std::cout << program->name() << std::endl;
