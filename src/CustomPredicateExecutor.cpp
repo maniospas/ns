@@ -101,7 +101,7 @@ std::shared_ptr<Object> CustomPredicateExecutor::value(std::shared_ptr<Scope> sc
 
 class PredicateScope: public Scope {
     public:
-        PredicateScope() : Scope(std::shared_ptr<Object>(nullptr), std::shared_ptr<Object>(nullptr), std::shared_ptr<Object>(nullptr)) {
+        PredicateScope() : Scope(std::shared_ptr<Object>(nullptr), std::shared_ptr<Object>(nullptr), std::shared_ptr<Object>(nullptr), std::shared_ptr<Thread>(nullptr)) {
         }
         std::shared_ptr<Object> get(const std::string& name) {
             return std::make_shared<String>(name);  // this class returns the string variable name as the variable value
@@ -186,7 +186,7 @@ bool CustomPredicateExecutor::can_call(std::shared_ptr<Scope> scope, std::shared
         auto prototype_object = derived_scope->get(assign_name);
         if(prototype_object==nullptr)
             error("Argument '"+assign_name+"' not found in the argument declaration's evaluation scope (this shouldn't happen).");
-        auto entered = std::make_shared<Scope>(prototype_object, std::shared_ptr<Object>(nullptr), std::shared_ptr<Object>(nullptr));
+        auto entered = std::make_shared<Scope>(prototype_object, std::shared_ptr<Object>(nullptr), std::shared_ptr<Object>(nullptr), scope->owner);
         auto condition = edit->expression();
         if(condition==nullptr) 
             error("Missing condition in argument declaration (empty expression after :, use unconditional declaration).");

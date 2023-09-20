@@ -70,6 +70,14 @@
         "compare": "cpp",
         "concepts": "cpp",
         "numbers": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "stop_token": "cpp",
+        "charconv": "cpp",
+        "coroutine": "cpp",
+        "source_location": "cpp",
+        "format": "cpp",
+        "semaphore": "cpp",
+        "span": "cpp",
+        "variant": "cpp"
     }
 }

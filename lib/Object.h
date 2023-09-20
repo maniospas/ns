@@ -5,6 +5,7 @@
 #include <memory>
 #include <list>
 class Scope;
+class Thread;
 
 
 class Object: public std::enable_shared_from_this<Object> {
@@ -17,14 +18,13 @@ class Object: public std::enable_shared_from_this<Object> {
         Object();
         virtual const std::string type() const = 0;
         virtual const std::string name() const = 0;
-        virtual void lock(){};
-        virtual void unlock(){};
+        virtual void lock(const std::shared_ptr<Thread> thread){};
+        virtual void unlock(const std::shared_ptr<Thread> thread){};
         virtual std::shared_ptr<Object> value(std::shared_ptr<Scope> scope) = 0;
         virtual std::shared_ptr<Object> get(const std::string& name);
         virtual void set(const std::string& name, const std::shared_ptr<Object> value);
         virtual const std::string assignment_name() const;
         static std::string get_stack_trace();
-        static void exit_stack(int from);
         static std::list<std::shared_ptr<Object>> stack;
         virtual bool is_primitive() {return false;};
         virtual bool is_parsed() {return false;};

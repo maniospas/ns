@@ -8,20 +8,25 @@
 #include "Object.h"
 #include "Thread.h"
 #include <pthread.h>
+#include <iostream>
 
 class CustomPredicateExecutor;
 
 class Scope: public Object {
     private:
         pthread_mutex_t entry_mutex = PTHREAD_MUTEX_INITIALIZER;
-        pthread_mutex_t threads_mutex = PTHREAD_MUTEX_INITIALIZER;
+        pthread_mutex_t access_mutex = PTHREAD_MUTEX_INITIALIZER;
+        pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
         std::map<std::string, std::shared_ptr<Object>> values;
         std::map<std::string, std::unique_ptr<std::vector<std::shared_ptr<Object>>>> overloaded;
+        int thread_depth = 0;
     public:
+        std::shared_ptr<Thread> owner;
         std::vector<std::shared_ptr<Thread>> threads;
         Scope(const std::shared_ptr<Object> super_, 
               const std::shared_ptr<Object> new_, 
-              const std::shared_ptr<Object> surface_);
+              const std::shared_ptr<Object> surface_,
+              const std::shared_ptr<Thread> owner_);
         virtual ~Scope();
         void set(const std::string& name, const std::shared_ptr<Object> value);
         std::shared_ptr<Object> get(const std::string& name);
@@ -34,10 +39,12 @@ class Scope: public Object {
         void load(std::shared_ptr<Object> method);
         const std::string type() const {return "scope";};
         void conclude_threads();
-        void lock(){pthread_mutex_lock(&entry_mutex);};
-        void unlock(){pthread_mutex_unlock(&entry_mutex);};
-        void lock_threads(){pthread_mutex_lock(&threads_mutex);};
-        void unlock_threads(){pthread_mutex_unlock(&threads_mutex);};
+        void lock(const std::shared_ptr<Thread> thread);
+        void unlock(const std::shared_ptr<Thread> thread);
+        void access_lock(const std::shared_ptr<Thread> thread);
+        void access_unlock(const std::shared_ptr<Thread> thread);
+        void thread_lock();
+        void thread_unlock();
 };
 
 #endif

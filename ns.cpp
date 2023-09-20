@@ -29,14 +29,18 @@ void* async_worker(void* arg) {
         std::shared_ptr<Scope> scope = *((std::shared_ptr<Scope>*)args[1]);
         std::shared_ptr<Thread> thread = *((std::shared_ptr<Thread>*)args[2]);
 
-        scope->lock_threads();
+        scope->lock(thread);
+
+        /*scope->thread_lock();
         scope->threads.push_back(thread); // do not remove this here, it will be removed on accessing
-        scope->unlock_threads();
+        scope->thread_unlock();*/
 
         auto ret = runnable->value(scope);
         if(ret==nullptr) 
             error("async nsbody evaluates to None");
         thread->result = ret;
+        
+        scope->unlock(thread);
     }
     delete (std::shared_ptr<Object>*)args[0];
     delete (std::shared_ptr<Scope>*)args[1];
@@ -232,13 +236,11 @@ class TryExecutor: public CustomPredicateExecutor {
             Object::stack.clear();
             try{
                 auto ret = exists(exists(scope->get("nssource"), "nssource")->value(scope), "nssource value");
-                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 return ret;
             }
             catch (std::runtime_error& e) {
                 std::cout << e.what() << std::endl;
-                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 return std::make_shared<String>(e.what());
                 //return std::make_shared<Number>(0);
@@ -259,12 +261,10 @@ class TryCatchExecutor: public CustomPredicateExecutor {
             Object::stack.clear();
             try{
                 auto ret = exists(exists(scope->get("nssource"), "nssource")->value(scope), "nssource value");
-                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 return ret;
             }
             catch (std::runtime_error& e) {
-                Object::exit_stack(previous_stack.size());
                 Object::stack = previous_stack;
                 auto except = exists(exists(scope->get("nsexcept"), "nsexcept")->value(scope), "nsexcept value");
                 return except;
@@ -281,7 +281,8 @@ int main(int argc, char *argv[]) {
     source = "run('"+source+"')";
     auto global = std::make_shared<Scope>(std::shared_ptr<Object>(nullptr), 
                                             std::shared_ptr<Object>(nullptr), 
-                                            std::shared_ptr<Object>(nullptr));
+                                            std::shared_ptr<Object>(nullptr),
+                                            std::make_shared<Thread>());
     global->load(std::make_shared<DetachExecutor>());
     global->load(std::make_shared<LoadExecutor>());
     global->load(std::make_shared<TryExecutor>());

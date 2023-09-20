@@ -1,5 +1,7 @@
 #include "Scoped.h"
 #include "Scope.h"
+#include <iostream>
+
 
 Scoped::Scoped(std::shared_ptr<Object> object) : object_(object) {
 }
@@ -14,7 +16,16 @@ const std::string Scoped::name() const {
 }
 
 std::shared_ptr<Object> Scoped::value(std::shared_ptr<Scope> scope) {
-    push();
-    std::shared_ptr<Scope> entered = scope->enter();
-    return pop(exists(object_, "scope contents")->value(entered));
+    object_->lock(scope->owner);
+    try {
+        push();
+        std::shared_ptr<Scope> entered = scope->enter();
+        auto ret = pop(exists(object_, "scope contents")->value(entered));
+        object_->unlock(scope->owner);
+        return ret;
+    }
+    catch (std::runtime_error& e) {
+        object_->unlock(scope->owner);
+        throw e;
+    }
 }

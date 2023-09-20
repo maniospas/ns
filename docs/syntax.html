@@ -77,8 +77,6 @@
               <li class="nav-item"><a class="nav-link smaller-font" href="#scopes-as-objects">Scopes as objects</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#define-expressions">Define expressions</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#scope-access">Scope access</a></li>
-              <li class="nav-item"><a class="nav-link smaller-font" href="#running-files">Running files</a></li>
-              <li class="nav-item"><a class="nav-link smaller-font" href="#precompiled-scopes">Precompiled scopes</a></li>
             </ul>
           </li>
           <li class="nav-item">
@@ -121,13 +119,13 @@
         <h1>The NS framework</h1>
         <p>Behind NSLang, which is a programming language, lies a metaprogramming framework called NS. This treats scopes, code blocks, and objects interchangeably; you can use the same simple interfaces to create complex designs, custom expressions, and self-modifying code.</p> 
 		
-		<p> NS is not a language by itself (it's not Turing complete) but it lets you define expressions that map to precompiled C++ code. Thus, it simplifies development of fully-fleshed programming languages, and even of compiled scopes that you can share between languages. At first, only the core framework is described, but later NSLang will be presented as a minimal augmentation of NS that is a complete language.
+		<p> NS is not a language by itself (it's not Turing complete) but it lets you define expressions that map to precompiled C++ code. Thus, it simplifies development of fully-fleshed programming languages, and even compiled scopes that you can share between languages. At first, only the core framework is described, but later NSLang will be presented as a minimal augmentation of NS that is a complete language.
 		</p>
         <section id="assignment-scope">
           <h4>Assignment scope</h4>
-		  <p>In NS, scopes are blocks of code with clearly defined rules regarding which variables or expressions they can access. Expressions are custom programming commands, some of them progrmammatically defined (you can follow a method-like syntax but also declare other structures that comprise multiple predicates). Declaring runable expressions is done with the := operation; even if the expressions have no variables. Use = to assign specific values to variables. These two assignment operators have the highest priority after scope brackets, and the leftmost one is prioritized. Before formally introducing expressions, only variable assignment will be used.</p>
+		  <p>In NS, scopes are blocks of code with clearly defined rules regarding which variables or expressions they can access. Expressions are custom programming commands, some of them programmatically defined (you can make expressions look like methods, but can also create other structures that comprise multiple predicates). Declaring runable expressions is done with the := operation. Use = to assign specific values to variables. These two assignment operators and the scope access : described later have the highest priority after scope brackets, and the leftmost one is prioritized. Before formally introducing expressions, only variable assignment will be used.</p>
 		
-		  <p>Starting from a top-level scope, you can declare new scopes inside it, separated by semicolons. Scopes can be enclosed within brackets or parentheses. Parentheses can be omitted, in which case NS dynamically tries to recognize the would-be parentheses scopes. Bracketed scopes do not modify external variables unless they explicitly access them via objects. Here's an example:
+		  <p>Starting from a top-level scope, you can declare new scopes inside it, separated by semicolons. Scopes can be enclosed within brackets or parentheses. Parentheses can be omitted, in which case NS dynamically tries to recognize the would-be scopes (it only creates an error in case of ambiguity). Bracketed scopes do not modify external variables unless they explicitly access them via objects. Here's an example:
 		  </p>
 
 <pre><code class="language-cpp">x = 0;
@@ -157,7 +155,7 @@ print(y); //1</code></pre>
 
         <section id="scopes-as-objects">
           <h4>Scopes as objects</h4>
-          <p>NS treats scopes as objects that hold their assigned variables. You can access object fields using the dot operator. This view is retrieved from the <tag class="fst-italic">new</tag> variable. For example:</p>
+          <p>NS treats scopes as objects that hold their assigned variables. This view is stored in the <tag class="fst-italic">new</tag> variable. At the surface level, think of this as an object storing all values declared in the scope, though it can also be used to re-enter the scope (more later). After obtaining the <tag class="fst-italic">new</tag> of a scope, you can access object fields using the scope access : operator.  Here's an example of using new to effectively create an object:</p>
 <pre><code class="language-cpp">point = {
 	x = 1;
 	y = 2;
@@ -166,24 +164,27 @@ print(y); //1</code></pre>
 print(point:x); //1 (runs the expression x in the point scope without NSLang)
 print(point:y); //1</code></pre>
 		
-		<p>All scopes have some additional variables that may modify their behavior (<tag class="fst-italic">super</tag>, <tag class="fst-italic">new</tag>, <tag class="fst-italic">ext</tag>). Of these, <tag class="fst-italic">super</tag> refers to the superscope, which is one level higher in the scope declaration hierarchy. When a variable is not found in a scope, it's retrieved from the superscope. <tag class="fst-italic">new</tag> holds the scope's assignments as a map/object and can be returned. We will talk about <tag class="fst-italic">new</tag> later. Here's an example of using new to effectively create an object:</p>
+		<p>All scopes have some additional variables that may modify their behavior (<tag class="fst-italic">super</tag>, <tag class="fst-italic">new</tag>, <tag class="fst-italic">ext</tag>). Of these, <tag class="fst-italic">super</tag> refers to the superscope, which is one level higher in the scope declaration hierarchy. When a variable or expression is not found in a scope, it's retrieved from the superscope. <tag class="fst-italic">new</tag> holds the scope's assignments as a map/object and can be returned. We will talk about <tag class="fst-italic">ext</tag> later. Here's an example of using the superscope's variables inside a scope:</p>
 		
 <pre><code class="language-cpp">z = 1;
+y = 3;
 point = {
 	x = z;
-	y = 2;
+	y = y+1; (sets the scope's y as super:y+1)
 	new
 };
 z = 0;
 print(z); //0
 print(point:x); //1
-print(point:super:z); //0</code></pre>
+print(point:super:z); //0
+print(y); //3 (did not change due to bracket)
+print(point:y); //4</code></pre>
         </section>
         
 		
         <section id="define-expressions">
           <h4>Define expressions</h4>
-          <p>NS supports expressions which are combinations of predicates that define callable formulas. Expresions can specify various notations that include spaces and can have any number of positional arguments. Arguments are enclosed in parentheses, and the comma is treated as a shorthand for <tag class="fst-italic">)(</tag>. Use the := assignment operator to declare how expressions should run. For instance, you can define a constructor for a certain kind of objects like this:<p> 
+          <p>NS supports expressions, which are combinations of predicates that define callable formulas. Expresions can specify various notations that include spaces and can have any number of positional arguments. Arguments are enclosed in parentheses, and the comma is treated as a shorthand for <tag class="fst-italic">)(</tag>. Use the := assignment operator to declare how expressions should run. For instance, you can define an object constructor like this:<p> 
 
 <pre><code class="language-cpp">Point(x,y,z) := { // x, y, z automatically accessed from super
     new
@@ -198,7 +199,7 @@ print(point.z); //3
 			Variables are expressions without arguments that always output the same value. They are different in that they can not be overloaded (rewritting their value makes any previous value irretrievable).
 		</div>
 
-		<p>Expression implementations can be enclosed in parentheses to transfer their internal assignments to the scope they are called from. For example, this can let formulas modify the scope they are retrieved from:
+		<p>Following scope assignment rules, expression implementations can be enclosed in parentheses to transfer their internal assignments to the scope they are called from. For example, this can let formulas modify the scope they are retrieved from:
 
 <pre><code class="language-cpp">Point(x,y,z) := {
     norm squared:=x*x + y*y + z*z; 
@@ -206,19 +207,19 @@ print(point.z); //3
     new
 };
 A = Point(0,0,1);
-print(A.norm squared); //1
+print(A:norm squared); //1
 </code></pre>
 
 
-		<p>Polymorphism of expressions can be achieved by declaring new methods with different numbers of arguments. NS also generalizes type polymorphism into logical checks that can be computed on arguments after entering their scope with the : notation (see below for scope entering). Non-scope objects are accessed via new. For example:</p>
+		<p>Polymorphism of expressions can be achieved by declaring new methods with different numbers of arguments. NS also generalizes type polymorphism by allowing logical checks that can be computed on arguments after entering their scope with the : notation (see below for scope entering). For example:</p>
 
 <pre><code class="language-cpp">Point(x,y,z) := {norm squared:=x*x+y*y+z*z;new};
 Point(x,y) := Point(x,y,0);
 Point(x:new<0,y) := Point(0,y);
 A = Point(1,1);
-print(A.norm squared); //2
+print(A:norm squared); //2
 A = Point(-1,1);
-print(A.norm squared); //1
+print(A:norm squared); //1
 </code></pre>
 	<p>Use objects to pass keyword arguments or arguments that you don’t want to remain in the object’s scope.</p>
         </section>
@@ -230,11 +231,11 @@ print(A.norm squared); //1
 		<p>You can interact with and manipulate scopes after their creation by entering them with the operator : to continue running operation inside. By writting a:b, you run the scope b within the scope/object a. Here's an example of accessing a scope:</p>
 		
 <pre><code class="language-cpp">point = {
-	x:=1;
-	y:=2;
+	x=1;
+	y=2;
 	new
 };
-point:x = 5; // the same as point.(x=5);
+point:x = 5; // the same as point:(x=5);
 print(point:x); //5
 
 point:(x=1; y=1;);
@@ -248,8 +249,8 @@ print(derived:super:x); //1</code></pre>
 		
 		<p>In the above scenarios, only variables of the accessed scope were manipulated. However, you will typically
 		want to pass some information from the scope from which the entry happened. This last scope
-		is stored in the <tag class="fst-italic">ext</tag> variable. This lets you pass messages between scopes.
-		This variable's value is not retained after exiting the scope, 
+		is temporarily stored in the <tag class="fst-italic">ext</tag> variable. Use this variable to pass messages between scopes.
+		Its value is not retained after exiting the scope, 
 		so keep a reference to it if you do not want to lose it.
 		Here's an example of using <tag class="fst-italic">ext</tag> to transfer information from an external scope:</p>
 		
@@ -259,25 +260,26 @@ a = {
 	new
 };
 print(a:x); //0
-a:x=ext:x+1;  //equivalent to a:(x=(ext:x+1)) because leftmost operators are given priority
+a:x=ext:x+1; //equivalent to a:(x=(ext:x+1)) because leftmost operators are given priority
 print(a:x); //1
 </code></pre>
 
 	<div class="alert alert-danger" role="alert">
-		The expression a:x = x first accesses the scope and then performs x=x. To retrieve or set specific values without explicitly referencing external scopes, use NSLang's . operation.
+		The expression a:x = x first accesses the scope and then performs x=x. You would need to write a:x=ext:x to retrieve an external variable.
 	</div>
 		
-	<p>Below is a more complicated example that overrides an expression using the : operation, in which a <tag class="fst-italic">base</tag> scope helps define a new version of the inequality formula in the scope <tag class="fst-italic">stricter</tag> by fallbacking to the base during its implementation.</p>
+	<p>Below is a more complicated example that overrides an expression using the : operation, in which a <tag class="fst-italic">base</tag> scope keeps track of the superscope and is used to define a new version of the inequality formula in the scope <tag class="fst-italic">stricter</tag> by fallbacking to the base during its implementation.</p>
 
-<pre><code class="language-cpp">base=new;
-stricter = {
-    pop(super); //remove
+<pre><code class="language-cpp">stricter = {
+    base = super; // super will change when entering brackets
     (x)<(y) := {
-        base: ((x)<((y)-(1))) //computation under the base scope
+        base: (#x < #y-1) //computation under the base scope
     };
     new
 };
-comp = stricter:(1)<(2); //test a comparison under the new scope
+a = 1;
+b = 2;
+comp = stricter:(ext:a)<(ext:b); //test a comparison under the new scope
 print(comp)
 </code></pre>
 
@@ -286,12 +288,12 @@ print(comp)
       
       <section id="nslang">
         <h1>NSLang</h1>
-        <p>NSLang is an extension of NS that includes enough epxressions to form a functional programming language. To include it in your scope, <a href="https://github.com/maniospas/ns">download</a> the namesake directory from the project's page, place it next to your <tag class="fst-italic">ns</tag> executable, and run the following file from within your code:</p>
+        <p>NSLang is an extension of NS that includes the necessary epxressions to form a functional programming language. To include it in your scope, <a href="https://github.com/maniospas/ns">download</a> the namesake directory from the project's page, place it next to your <tag class="fst-italic">ns</tag> executable, and run the following file from within your code:</p>
 		
 		<pre><code class="language-cpp">run('nslang/all.ns');
 </code></pre>
 
-		<p>This loads all language expressions, including control flow (conditions and loops). Inside the <tag class="fst-italic">nslang</tag> directory you can also find implementations of independent scopes, which you can reuse to define new programming languages, or to load a lightweight subset of NSLang's expressions.</p>
+		<p>This loads all language expressions, including control flow (conditions and loops). Inside the <tag class="fst-italic">nslang</tag> directory, you can also find implementations of independent scopes, some of which you can reuse to define new programming languages, or to load lightweight subsets of NSLang.</p>
 		
         <section id="math">
           <h4>Math</h4>
@@ -311,7 +313,8 @@ print("Hello "+name+"!");
         
         <section id="control-flow">
           <h4>Control flow</h4>
-          <p>NS provides conditions and loops. Recall that assignments within bracketed scopes do not escape to parents, but conditions are also scopes to be evaluated. For example, the following snippet prints the squares of all integers less than 10 without exposing any internally generated variables; the loop's condition is responsible for iterating through the integeres by changing the superscope's iterated variable, and the body performs safe assignments.</p>
+          <p>NS provides conditions and loops. When useing these, remember that that assignments within bracketed scopes do not escape to parents, even if you put these in the body of the flows. However, conditions are also scopes to be evaluated</p> 
+		  <p>For example, the following snippet prints the squares of all integers less than 10 without exposing any internally generated variables; the loop's condition is responsible for iterating through the integeres by changing the superscope's iterated variable, and the body performs safe assignments.</p>
 
 <pre><code class="language-cpp">i=-1;
 while(i=i+1;i<10) {
@@ -320,10 +323,18 @@ while(i=i+1;i<10) {
 }
 </code></pre>
 
-        </section>
-		  
+		<p>You can write consise loops by creating a scope object with initial values and entering this to run the loop. For example, the following snippet computes the sum 1+2+...+10 without leaking any values to the surrounding scope. Notice how the initializer scope is bracketed for safety, but the loop's body edits the variable x and thus it is not. The outcome of entering the initializer scope is the last output of the loop.
+		</p>
+
+<pre><code class="language-cpp">sum = {i=0;x=0;new}:while(i=i+1;i<=10) (x=x+i);
+print(sum); // 55
+</code></pre>
+
 
         </section>
+		
+		
+		
         
         
         <section id="errors">
