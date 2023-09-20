@@ -77,6 +77,7 @@
               <li class="nav-item"><a class="nav-link smaller-font" href="#scopes-as-objects">Scopes as objects</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#define-expressions">Define expressions</a></li>
               <li class="nav-item"><a class="nav-link smaller-font" href="#scope-access">Scope access</a></li>
+              <li class="nav-item"><a class="nav-link smaller-font" href="#threading">Threading</a></li>
             </ul>
           </li>
           <li class="nav-item">
@@ -284,6 +285,49 @@ print(comp)
 </code></pre>
 
       </section>
+	  
+	  
+	  <section id="threading">
+	  <h4>Threading</h4>
+	  
+	  <p>NS can spawn threads that run in parallel to the rest of your code with the async(scope) expression.
+	  Code within threads gains safe access to any scopes; when invoking the : operator. That is, threads gain full and uninterupted access to scopes being entered and their superscopes. As a result, any changes made within the scope to persist for the duration of the access. Other threads will have to wait for the accessing thread to release the access, e.g., by moving to the next expression. Here's an example that uses a thread to delegate computations to the background:
+	  </p>
+	  
+	  <pre><code class="language-cpp">tester = {
+	test := async(
+		i=0;
+		while(i<1000000)(
+			i=i+1;
+		);
+	);
+};
+tester:test; // will create a thread
+x = 1; // will run immediately
+print(x); // 1
+print(tester:i); // will now wait for the conclusion of test and always be 1000000
+</code></pre>
+
+		<p>
+		Since entered scopes cannot be interupted, any threads spawned internally will wait for the scope's conclusion before starting. You can keep the thread as a variable and obtain its outcome via the join(...) expression -  joining will also wait for the thread's conclusion before retrieving the value. Here's an example:
+		</p>
+		
+		
+	  <pre><code class="language-cpp">thread = { // i will not leak
+	  i = 0;
+	  thread = async(i); // executes after leaving the scope
+	  i = 1;
+	  thread
+};
+result = join(thread);
+print(result); // 1
+</code></pre>
+	  
+	  </section>
+		
+	  
+	  
+	  
       </section>
       
       <section id="nslang">
@@ -313,7 +357,7 @@ print("Hello "+name+"!");
         
         <section id="control-flow">
           <h4>Control flow</h4>
-          <p>NS provides conditions and loops. When useing these, remember that that assignments within bracketed scopes do not escape to parents, even if you put these in the body of the flows. However, conditions are also scopes to be evaluated</p> 
+          <p>NS provides conditions and loops. When using these, remember that that assignments within bracketed scopes do not escape to parents, even if you put these in the body of the flows. However, conditions are also scopes to be evaluated</p> 
 		  <p>For example, the following snippet prints the squares of all integers less than 10 without exposing any internally generated variables; the loop's condition is responsible for iterating through the integeres by changing the superscope's iterated variable, and the body performs safe assignments.</p>
 
 <pre><code class="language-cpp">i=-1;
