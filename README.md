@@ -5,7 +5,7 @@ NSLang is a programming language that implements traditional programming express
 
 **Author:** Emmanouil (Manios) Krasanakis<br>
 **License:** Apache 2<br>
-**Status:** The core language interpreter is still being developed
+**Status:** The core language interpreter is still being developed.
 
 Documentation: https://maniospas.github.io/ns
 

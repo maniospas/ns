@@ -40,15 +40,15 @@
 			<div class="card">
 				<div class="card-body">
 					<h2 class="card-title">NSLang</h2>
-					<p class="card-text">NS lets you declare and run expressions with programmatic or precompiled C++ implementations. <b>NSLang</b> is a language built on top of NS by <a href="syntax.html#nslang">adding expressions</a>. Here's an example of its code:</p>
+					<p class="card-text">NS lets you declare and run expressions either programmatically or from compiled C++. <a href="syntax.html#nslang">NSLang</a> is a language built on top of this framework. Here's an example:</p>
 					
 					<pre><code class="language-cpp">run('nslang/all.ns');	
 //Print declared by NSLang
 print('Hello world!');
 </code></pre>
-Conditions, loops, arithmetics, and =
-are declared by NSLang. Conditions are
-scopes that are evaluate to their
+Conditions, loops, and arithmetics 
+are declared by NSLang. Conditions are scopes and thus
+evaluate to their
 last expression's outcome.
 <pre><code class="language-cpp">while(i=i+1;i<=10) {
 	i = 0;
@@ -62,15 +62,19 @@ last expression's outcome.
 			<div class="card">
 				<div class="card-body">
 					<h2 class="card-title">Scopes</h2>
-					<p class="card-text">Use a brackets to prevent any assignment or declaration from leaking to enclosing superscopes. Parentheses declare scopes that just run code. Do not put a semicolon after the last expression to make it the scope's returned value.</p>
+					<p class="card-text">Brackets do not write to enclosing superscopes. Parentheses just run. The last expression value is returned.</p>
 					<pre><code class="language-cpp">x = 0;
 y = {x = x+2; x*x};
 print(x); //0
 print(y); //4</code></pre>
-					<p class="card-text"><b>new</b> references the scope object itself. Return it and access its contents with the dot notation.</p>
+					<p class="card-text"><b>new</b> is the scope itself and can be re-entered with the : operator.</p>
 					<pre><code class="language-cpp">x = 0;
 y = {z = x+1; new};
-print(y.z); //1</code></pre>
+print(y:z); //1
+y:( //directly edit y
+	z=z+1;
+	print(z); //2
+);</code></pre>
 				</div>
 			</div>
 		</div>
@@ -87,8 +91,8 @@ Point(x,y) := { //views x,y
 }; 
 print(add(1,2)); //3
 print(sub (3) from (1,2)); //0
-print(Point(1,2).x); //1 
-print(Point(1,2).el sum); //3
+print(Point(1,2):x); //1 
+print(Point(1,2):el sum); //3
 </code></pre>
 				</div>
 			</div>
@@ -97,19 +101,21 @@ print(Point(1,2).el sum); //3
 		<div class="col-md-3">
 			<div class="card">
 				<div class="card-body">
-					<h2 class="card-title">Overloading</h2>
+					<h2 class="card-title">Threading</h2>
 		
-					<p class="card-text">The NS colon operator (the dot is defined by NSLang) enters a scope. It uses the scope from where it is called as a fallback variable getter. Override any formula like so.</p>
-					<pre><code class="language-cpp">P(x,y,z) := {
-	norm sq:=x*x+y*y+z*z;
+					<p class="card-text">Threading is <b>safe</b>; only one thread at a time can enter a scope or its superscopes.</p>
+					<pre><code class="language-cpp">tester = {
+	test := async( //thread
+		i=0;
+		while(i<100000)(
+			i=i+1
+		)
+	);
 	new
 };
-P(x,y) := P(x,y,0);
-P(x:new<0,y) := P(0,y);
-p1 = P(1,1);
-p2 = P(-1,1);
-print(p1.norm sq); //2
-print(p2.norm sq); //1
+tester:test;
+print("Waiting...");
+print(tester:i); //waits
 </pre></code>
 				</div>
 			</div>
