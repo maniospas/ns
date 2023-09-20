@@ -6,6 +6,18 @@ Thread::Thread() {
 Thread::~Thread() {
 }
 
+
+std::string Thread::get_stack_trace() {
+    std::string trace = "";
+    for (auto obj : stack) {
+        trace += "\nat ";
+        trace += obj->type();
+        trace += " ";
+        trace += obj->name();
+    }
+    return trace;
+}
+
 const std::string Thread::name() const {
     if(result!=nullptr)
         return "thread (finished, use result = join(...) to get the result)";

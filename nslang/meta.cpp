@@ -14,7 +14,7 @@ class SizeExecutor: public CustomPredicateExecutor {
         SizeExecutor(): CustomPredicateExecutor("size(nsblock)") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> block = exists(scope->get("nsblock"), "nsblock");
+            std::shared_ptr<Object> block = exists(scope, scope->get("nsblock"), "nsblock");
             return std::make_shared<Number>(block->size());
         }
 };
@@ -24,15 +24,15 @@ class GetExecutor: public CustomPredicateExecutor {
         GetExecutor(): CustomPredicateExecutor("get(nsblock)(nsindex)") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> block = exists(scope->get("nsblock"), "nsblock");
-            std::shared_ptr<Object> i_obj = exists(scope->get("nsindex"), "nsindex");
+            std::shared_ptr<Object> block = exists(scope, scope->get("nsblock"), "nsblock");
+            std::shared_ptr<Object> i_obj = exists(scope, scope->get("nsindex"), "nsindex");
             auto i = std::dynamic_pointer_cast<Number>(i_obj);
             if(i!=nullptr)
                 return block->get((int)i->value());
             if(std::dynamic_pointer_cast<Unscoped>(i_obj)!=nullptr)
                 i_obj = std::dynamic_pointer_cast<Unscoped>(i_obj)->contents();
             return block->get(i_obj->name());
-            //exists(i, "nsindex is not a number (use nsblock:get(nsindex) instead)");
+            //exists(scope, i, "nsindex is not a number (use nsblock:get(nsindex) instead)");
         }
 };
 
@@ -41,11 +41,11 @@ class SetExecutor: public CustomPredicateExecutor {
         SetExecutor(): CustomPredicateExecutor("set(nsblock)(nsindex)(nsvalue)") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> block = exists(scope->get("nsblock"), "nsblock");
-            std::shared_ptr<Object> i_obj = exists(scope->get("nsindex"), "nsindex");
+            std::shared_ptr<Object> block = exists(scope, scope->get("nsblock"), "nsblock");
+            std::shared_ptr<Object> i_obj = exists(scope, scope->get("nsindex"), "nsindex");
             std::shared_ptr<Object> value = scope->get("nsvalue");
             auto i = std::dynamic_pointer_cast<Number>(i_obj);
-            exists(i, "nsindex not a number");
+            exists(scope, i, "nsindex not a number");
             block->set((int)i->value(), value);
             return value;
         }
@@ -57,7 +57,7 @@ class SelfSetExecutor: public CustomPredicateExecutor {
         SelfSetExecutor(): CustomPredicateExecutor("set(nsname)(nsvalue)") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> name = exists(scope->get("nsname"), "nsname");
+            std::shared_ptr<Object> name = exists(scope, scope->get("nsname"), "nsname");
             std::shared_ptr<Object> value = scope->get("nsvalue");
             scope->set(name->name(), value);
             return value;
@@ -70,7 +70,7 @@ class SelfGetExecutor: public CustomPredicateExecutor {
         SelfGetExecutor(): CustomPredicateExecutor("get(nsname)") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::shared_ptr<Object> name = exists(scope->get("nsname"), "nsname");
+            std::shared_ptr<Object> name = exists(scope, scope->get("nsname"), "nsname");
             return scope->get(name->name());
         }
 };

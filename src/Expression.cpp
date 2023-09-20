@@ -13,7 +13,7 @@
 Expression::Expression(std::vector<std::shared_ptr<PredicatePart>> names): names_(names) {
     for(int i=0;i<names_.size();i++)  {
         if(names_[i]==nullptr)
-            error("Empty predicate part");
+            error(std::shared_ptr<Scope>(nullptr), "Empty predicate part");
     }
 }
 
@@ -37,11 +37,11 @@ bool sorter (std::shared_ptr<CustomPredicateExecutor> i, std::shared_ptr<CustomP
 }
 
 std::shared_ptr<Object> Expression::value(std::shared_ptr<Scope> scope) {
-    push();
+    push(scope);
     auto obj = scope->get(assignment_name());
     std::shared_ptr<CustomPredicateExecutor> executor = std::dynamic_pointer_cast<CustomPredicateExecutor>(obj);
     if(obj!=nullptr && executor==nullptr)
-        return pop(obj);
+        return pop(scope, obj);
     if(obj==nullptr) {
         // just in time parsing based on parent scope
         std::map<std::string, std::shared_ptr<CustomPredicateExecutor>>executors_map;
@@ -84,10 +84,10 @@ std::shared_ptr<Object> Expression::value(std::shared_ptr<Scope> scope) {
 
     }
     if(executor==nullptr)
-        error("No implementation for "+assignment_name()+" with matching argument constraints");
+        error(scope, "No implementation for "+assignment_name()+" with matching argument constraints");
     auto value_scope = executor->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()));
     if(executor->can_call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope)){
-        return pop(executor->call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope));
+        return pop(scope, executor->call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope));
     }
     auto overloaded_versions = std::vector<std::shared_ptr<CustomPredicateExecutor>>();
     scope->gather_overloads(assignment_name(), overloaded_versions);
@@ -98,10 +98,10 @@ std::shared_ptr<Object> Expression::value(std::shared_ptr<Scope> scope) {
         // TODO: for HUGE speedup, create arguments as lists and only align the evaluations here to create a new scope
         value_scope = exec->evaluate_all_arguments(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()));
         if(exec->can_call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope))
-          return pop(exec->call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope));
+          return pop(scope, exec->call(scope, std::dynamic_pointer_cast<Expression>(shared_from_this()), value_scope));
     }
-    error("No implementation of "+executor->assignment_name()+" matches argument constraints");
-    return pop(std::shared_ptr<Object>(nullptr));
+    error(scope, "No implementation of "+executor->assignment_name()+" matches argument constraints");
+    return pop(scope, std::shared_ptr<Object>(nullptr));
 }
 
 const std::string Expression::assignment_name() const {

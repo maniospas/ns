@@ -47,12 +47,12 @@ std::shared_ptr<Object> Sequence::value(std::shared_ptr<Scope> scope) {
 
 void Sequence::set(int i, std::shared_ptr<Object> value) {
     if(i<0 || i>=expressions.size())
-        error("Setter index out of range");
+        error(std::shared_ptr<Scope>(nullptr), "Setter index out of range");
     expressions[i] = value;
 }
 std::shared_ptr<Object> Sequence::get(int i) {
     if(i<0 || i>=expressions.size())
-        error("Getter index out of range");
+        error(std::shared_ptr<Scope>(nullptr), "Getter index out of range");
     return expressions[i];
 }
 int Sequence::size() {

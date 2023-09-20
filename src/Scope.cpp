@@ -53,7 +53,7 @@ void Scope::unlock(const std::shared_ptr<Thread> thread){
     if(superscope!=nullptr) 
         superscope->unlock(thread);
     if(thread.get()!=owner.get())
-        error("Synchronization error on unlocking scope from different thread.");
+        error(std::dynamic_pointer_cast<Scope>(shared_from_this()), "Synchronization error on unlocking scope from different thread.");
     thread_depth -= 1;
     if(thread_depth==0){
         //std::cout<<"unlocked "<<this<<"\n";
@@ -140,6 +140,7 @@ void Scope::gather_overloads(const std::string& signature, std::vector<std::shar
         std::dynamic_pointer_cast<Scope>(surfacescope)->gather_overloads(signature, overloads);
     */
 }
+
 
 void Scope::set(const std::string& name, const std::shared_ptr<Object> value) {
     access_lock(owner);

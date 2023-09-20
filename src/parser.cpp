@@ -55,8 +55,11 @@ const std::string Callable::assignment_name() const {
     return CustomPredicateExecutor::assignment_name();
 }
 
-void error(const std::string& message) {
-    throw std::runtime_error(message+Object::get_stack_trace());
+void error(const std::shared_ptr<Scope>& scope, const std::string& message) {
+    if(scope==nullptr || scope->owner==nullptr)
+        throw std::runtime_error(message);
+    else
+        throw std::runtime_error(message+scope->owner->get_stack_trace());
 }
 
 std::vector<std::string> tokenize(const std::string& source) {
@@ -329,7 +332,7 @@ std::vector<std::shared_ptr<PredicatePart>> predicate_parts(std::vector<std::str
         }
     }
     if(block_start!=-1 || depth>0)
-        error("Imbalanced parentheses or brackets.");
+        error(std::shared_ptr<Scope>(nullptr), "Imbalanced parentheses or brackets.");
     return predicateParts;
 }
 

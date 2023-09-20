@@ -12,8 +12,8 @@ class AddExecutor: public CustomPredicateExecutor {
             priority = 4;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             return std::make_shared<Number>(a+b);
         }
 };
@@ -24,8 +24,8 @@ class SubExecutor: public CustomPredicateExecutor {
             priority = 3;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             return std::make_shared<Number>(a-b);
         }
 };
@@ -36,8 +36,8 @@ class MulExecutor: public CustomPredicateExecutor {
             priority = 2;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             return std::make_shared<Number>(a*b);
         }
 };
@@ -48,10 +48,10 @@ class DivExecutor: public CustomPredicateExecutor {
             priority = 1;
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             if(b==0)
-                error("Division by zero");
+                error(scope, "Division by zero");
             return std::make_shared<Number>(a/b);
         }
 };
@@ -62,8 +62,8 @@ class LessExecutor: public CustomPredicateExecutor {
         LessExecutor(): CustomPredicateExecutor("(a)<(b)") {
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             return std::make_shared<Number>(a<b);
         }
 };
@@ -73,8 +73,8 @@ class LessEqExecutor: public CustomPredicateExecutor {
         LessEqExecutor(): CustomPredicateExecutor("(a)<=(b)") {
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             return std::make_shared<Number>(a<=b);
         }
 };
@@ -84,8 +84,8 @@ class GreaterExecutor: public CustomPredicateExecutor {
         GreaterExecutor(): CustomPredicateExecutor("(a)>(b)") {
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             return std::make_shared<Number>(a>b);
         }
 };
@@ -95,8 +95,8 @@ class GreaterEqExecutor: public CustomPredicateExecutor {
         GreaterEqExecutor(): CustomPredicateExecutor("(a)>=(b)") {
         }
         virtual std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            float a = std::dynamic_pointer_cast<Number>(exists(scope->get("a")))->value();
-            float b = std::dynamic_pointer_cast<Number>(exists(scope->get("b")))->value();
+            float a = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("a")))->value();
+            float b = std::dynamic_pointer_cast<Number>(exists(scope, scope->get("b")))->value();
             return std::make_shared<Number>(a>=b);
         }
 };

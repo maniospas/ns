@@ -22,7 +22,7 @@ public:
     std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
         pthread_mutex_lock(&MutexHolder::io_mutex);
         try {
-            auto text = exists(scope->get("text"), "text");
+            auto text = exists(scope, scope->get("text"), "text");
             std::cout << text->name() << std::endl;
             pthread_mutex_unlock(&MutexHolder::io_mutex);
             return text;
@@ -41,7 +41,7 @@ public:
     std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
         pthread_mutex_lock(&MutexHolder::io_mutex);
         try {
-            std::cout << exists(scope->get("prompt"), "prompt")->name();
+            std::cout << exists(scope, scope->get("prompt"), "prompt")->name();
             std::string input;
             std::getline(std::cin, input);
             pthread_mutex_unlock(&MutexHolder::io_mutex);

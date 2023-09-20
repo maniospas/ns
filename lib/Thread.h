@@ -19,6 +19,8 @@ class Thread: public Object
         const std::string type() const {return "thread";};
         bool is_primitive() {return true;};
         bool is_parsed() {return true;};
+        std::string get_stack_trace();
+        std::list<std::shared_ptr<Object>> stack;
 };
 
 #endif

@@ -37,7 +37,7 @@ void* async_worker(void* arg) {
 
         auto ret = runnable->value(scope);
         if(ret==nullptr) 
-            error("async nsbody evaluates to None");
+            error(scope, "async nsbody evaluates to None");
         thread->result = ret;
         
         scope->unlock(thread);
@@ -58,7 +58,7 @@ class AsyncExecutor: public CustomPredicateExecutor {
             return CustomPredicateExecutor::predicateScope;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            auto ret = exists(scope->get("nsbody"), "nsbody");
+            auto ret = exists(scope, scope->get("nsbody"), "nsbody");
             void** args = new void*[3];
             auto thread = std::make_shared<Thread>();
             args[0] = new std::shared_ptr<Object>(ret);
@@ -75,8 +75,8 @@ class JoinExecutor: public CustomPredicateExecutor {
         JoinExecutor(): CustomPredicateExecutor("join(nsthread)") {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            auto thread = std::dynamic_pointer_cast<Thread>(exists(scope->get("nsthread"), "nsthread"));
-            exists(thread, "is not a thread (create threads with async(...))");
+            auto thread = std::dynamic_pointer_cast<Thread>(exists(scope, scope->get("nsthread"), "nsthread"));
+            exists(scope, thread, "is not a thread (create threads with async(...))");
             pthread_join(*thread->value(), NULL);
             return thread->result;
         }
@@ -90,7 +90,7 @@ class DetachExecutor: public CustomPredicateExecutor {
             return CustomPredicateExecutor::predicateScope;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            auto ret = exists(scope->get("nspopfield"), "nspopfield");
+            auto ret = exists(scope, scope->get("nspopfield"), "nspopfield");
             scope->set(ret->name(), std::shared_ptr<Object>(nullptr));
             return ret;
         }
@@ -143,15 +143,15 @@ typedef std::shared_ptr<Object> (*DLL_run)(std::shared_ptr<Scope>);
 std::shared_ptr<Object> run_dll(std::string& name, std::shared_ptr<Scope> scope) {
     int requiredSize = MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, nullptr, 0);
     if (requiredSize == 0) 
-        error("Error in MultiByteToWideChar");
+        error(scope, "Error in MultiByteToWideChar");
     wchar_t* wideDllPath = new wchar_t[requiredSize];
     if (MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, wideDllPath, requiredSize) == 0) {
         delete[] wideDllPath;
-        error("Error in MultiByteToWideChar");
+        error(scope, "Error in MultiByteToWideChar");
     }
     HMODULE hDLL = LoadLibraryW(wideDllPath);
     if (hDLL == NULL) 
-        error("Failed to load "+name);
+        error(scope, "Failed to load "+name);
     DLL_run run = (DLL_run)GetProcAddress(hDLL, "run");
     return run(scope);
 }
@@ -173,7 +173,7 @@ std::shared_ptr<Object> run_cpp(std::string& name_, std::shared_ptr<Scope> scope
         std::system(command.c_str());
     }
     if(!file_exists(compiled.c_str())) 
-        error("Compilation failure");
+        error(scope, "Compilation failure");
     return run_dll(compiled, scope);
 }
 
@@ -185,7 +185,7 @@ typedef std::shared_ptr<Object> (*DLL_run)(std::shared_ptr<Scope>);
 std::shared_ptr<Object> run_dll(std::string& name, std::shared_ptr<Scope> scope) {
     void* hDLL = dlopen(name, RTLD_LAZY);
     if (hDLL == NULL) 
-        error("Failed to load "+name);
+        error(scope, "Failed to load "+name);
     DLL_run run = (DLL_run)dlsym(libraryHandle, "run");
     return run(scope);
 }
@@ -203,7 +203,7 @@ class LoadExecutor: public CustomPredicateExecutor {
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
             //try{
-                std::shared_ptr<Object> obj = exists(scope->get("nspath"), "nspath");
+                std::shared_ptr<Object> obj = exists(scope, scope->get("nspath"), "nspath");
                 if(std::dynamic_pointer_cast<String>(obj)!=nullptr) {
                     std::string source = obj->name();
                     if(ends_with(source, ".dll") || ends_with(source, ".so") || ends_with(source, ".dylib")) 
@@ -212,9 +212,9 @@ class LoadExecutor: public CustomPredicateExecutor {
                         return run_cpp(source, scope);
                     if(ends_with(source, ".ns"))
                         source = readfile(source);
-                    obj = exists(parse(source), "failed to parse file contents");
+                    obj = exists(scope, parse(source), "failed to parse file contents");
                 }
-                return exists(obj->value(scope), "failed to parse string expression");
+                return exists(scope, obj->value(scope), "failed to parse string expression");
             /*}
             catch (std::runtime_error& e) {
                 std::cout << e.what() << std::endl;
@@ -232,16 +232,16 @@ class TryExecutor: public CustomPredicateExecutor {
             return CustomPredicateExecutor::predicateScope;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::list<std::shared_ptr<Object>> previous_stack(Object::stack);
-            Object::stack.clear();
+            std::list<std::shared_ptr<Object>> previous_stack(scope->owner->stack);
+            scope->owner->stack.clear();
             try{
-                auto ret = exists(exists(scope->get("nssource"), "nssource")->value(scope), "nssource value");
-                Object::stack = previous_stack;
+                auto ret = exists(scope, exists(scope, scope->get("nssource"), "nssource")->value(scope), "nssource value");
+                scope->owner->stack = previous_stack;
                 return ret;
             }
             catch (std::runtime_error& e) {
                 std::cout << e.what() << std::endl;
-                Object::stack = previous_stack;
+                scope->owner->stack = previous_stack;
                 return std::make_shared<String>(e.what());
                 //return std::make_shared<Number>(0);
             }
@@ -257,16 +257,16 @@ class TryCatchExecutor: public CustomPredicateExecutor {
             return CustomPredicateExecutor::predicateScope;
         }
         std::shared_ptr<Object> implement(std::shared_ptr<Scope> scope) {
-            std::list<std::shared_ptr<Object>> previous_stack(Object::stack);
-            Object::stack.clear();
+            std::list<std::shared_ptr<Object>> previous_stack(scope->owner->stack);
+            scope->owner->stack.clear();
             try{
-                auto ret = exists(exists(scope->get("nssource"), "nssource")->value(scope), "nssource value");
-                Object::stack = previous_stack;
+                auto ret = exists(scope, exists(scope, scope->get("nssource"), "nssource")->value(scope), "nssource value");
+                scope->owner->stack = previous_stack;
                 return ret;
             }
             catch (std::runtime_error& e) {
-                Object::stack = previous_stack;
-                auto except = exists(exists(scope->get("nsexcept"), "nsexcept")->value(scope), "nsexcept value");
+                scope->owner->stack = previous_stack;
+                auto except = exists(scope, exists(scope, scope->get("nsexcept"), "nsexcept")->value(scope), "nsexcept value");
                 return except;
             }
         }

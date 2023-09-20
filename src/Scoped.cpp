@@ -18,9 +18,9 @@ const std::string Scoped::name() const {
 std::shared_ptr<Object> Scoped::value(std::shared_ptr<Scope> scope) {
     object_->lock(scope->owner);
     try {
-        push();
+        push(scope);
         std::shared_ptr<Scope> entered = scope->enter();
-        auto ret = pop(exists(object_, "scope contents")->value(entered));
+        auto ret = pop(scope, exists(scope, object_, "scope contents")->value(entered));
         object_->unlock(scope->owner);
         return ret;
     }
